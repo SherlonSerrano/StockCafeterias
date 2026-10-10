@@ -1,0 +1,169 @@
+-- =========================================================
+-- SCRIPT 4 - PRUEBAS DE LOS PROCEDIMIENTOS ALMACENADOS
+-- Ejecutar DESPUES de 03_procedimientos_v2.sql
+-- Ejecuta cada prueba por separado: selecciona SOLO el bloque
+-- (desde el comentario hasta el GO) y presiona F5.
+-- Las pruebas 5, 6 y 8 a 10 modifican datos; si quieres una base
+-- limpia al final, vuelve a ejecutar los scripts 01, 02 y 03.
+-- =========================================================
+USE StockCafeterias;
+GO
+
+-- ---------------------------------------------------------
+-- PRUEBA 1: reporte de stock del local 1 (debe devolver 25 filas)
+-- ---------------------------------------------------------
+EXEC sp_ReporteStockPorLocal @IdLocal = 1;
+GO
+
+-- ---------------------------------------------------------
+-- PRUEBA 2: login
+-- 2a. Credenciales correctas: debe devolver 1 fila
+-- ---------------------------------------------------------
+EXEC sp_ValidarLogin @NombreUsuario = 'admin', @PasswordHash = 'HASH_TEMP_000';
+GO
+
+-- 2b. Clave incorrecta: no debe devolver filas
+EXEC sp_ValidarLogin @NombreUsuario = 'admin', @PasswordHash = 'clave_mala';
+GO
+
+-- ---------------------------------------------------------
+-- PRUEBA 3: tipo de movimiento invalido
+-- Debe dar el error 50001
+-- ---------------------------------------------------------
+EXEC sp_RegistrarMovimientoStock
+    @IdLocal = 1, @IdInsumo = 6, @IdUsuario = 2,
+    @TipoMovimiento = 'X', @Cantidad = 5, @Observacion = 'Prueba tipo invalido';
+GO
+
+-- ---------------------------------------------------------
+-- PRUEBA 4: merma mayor al stock disponible
+-- El insumo 6 en el local 1 tiene stock 0.
+-- Debe dar el error 50003 y NO dejar el stock en negativo.
+-- ---------------------------------------------------------
+EXEC sp_RegistrarMovimientoStock
+    @IdLocal = 1, @IdInsumo = 6, @IdUsuario = 2,
+    @TipoMovimiento = 'M', @Cantidad = 999, @Observacion = 'Prueba stock insuficiente';
+GO
+
+-- ---------------------------------------------------------
+-- PRUEBA 5: envio valido (el stock del insumo 6 en el local 1 sube de 0 a 10)
+-- ---------------------------------------------------------
+SELECT 'ANTES' AS Momento, CantidadActual FROM StockLocal WHERE IdLocal = 1 AND IdInsumo = 6;
+EXEC sp_RegistrarMovimientoStock
+    @IdLocal = 1, @IdInsumo = 6, @IdUsuario = 2,
+    @TipoMovimiento = 'E', @Cantidad = 10, @Observacion = 'Prueba envio valido';
+SELECT 'DESPUES' AS Momento, CantidadActual FROM StockLocal WHERE IdLocal = 1 AND IdInsumo = 6;
+SELECT TOP (1) * FROM vw_MovimientosDetallado ORDER BY IdMovimiento DESC;
+GO
+
+-- ---------------------------------------------------------
+-- PRUEBA 6: cierre del dia del local 1
+-- Devuelve el IdCierreDia. Luego se ven las alertas actuales de ese local.
+-- ---------------------------------------------------------
+EXEC sp_CerrarDia @IdLocal = 1, @IdUsuario = 2, @Observacion = 'Prueba de cierre';
+SELECT * FROM vw_AlertasStockActual WHERE Local = 'Cafeteria Jockey Plaza';
+GO
+
+-- ---------------------------------------------------------
+-- PRUEBA 7: reporte de alertas por periodo (incluye el dia de hoy)
+-- ---------------------------------------------------------
+DECLARE @Hoy DATE = CAST(GETDATE() AS DATE);
+EXEC sp_ReporteAlertasPorPeriodo @FechaInicio = '2026-01-01', @FechaFin = @Hoy;
+GO
+
+-- ---------------------------------------------------------
+-- PRUEBA 8: CRUD de Producto (insertar, actualizar, eliminar y listar)
+-- ---------------------------------------------------------
+DECLARE @nuevo TABLE (IdProducto INT);
+DECLARE @id INT;
+
+INSERT INTO @nuevo
+EXEC sp_Producto_Insertar
+    @Nombre = 'Producto de prueba', @IdCategoria = 1, @PrecioVenta = 10.00,
+    @CostoPromedio = 4.00, @StockMaximo = 10, @Usuario = 'admin';
+
+SELECT @id = IdProducto FROM @nuevo;
+
+EXEC sp_Producto_Actualizar
+    @IdProducto = @id, @Nombre = 'Producto de prueba editado', @IdCategoria = 1,
+    @PrecioVenta = 11.50, @CostoPromedio = 4.50, @StockMaximo = 12, @Estado = 1, @Usuario = 'admin';
+
+EXEC sp_Producto_ObtenerPorId @IdProducto = @id;
+
+EXEC sp_Producto_Eliminar @IdProducto = @id, @Usuario = 'admin';
+
+-- Estado = NULL para ver tambien los inactivos: debe salir con Estado 0
+EXEC sp_Producto_Listar @Buscar = 'prueba', @Estado = NULL;
+GO
+
+-- ---------------------------------------------------------
+-- PRUEBA 9: CRUD de Insumo
+-- ---------------------------------------------------------
+DECLARE @nuevoIns TABLE (IdInsumo INT);
+DECLARE @idIns INT;
+
+INSERT INTO @nuevoIns
+EXEC sp_Insumo_Insertar
+    @Descripcion = 'Insumo de prueba', @Precio = 5.00, @IdUnidadMedida = 1,
+    @StockMinimo = 3, @Usuario = 'admin';
+
+SELECT @idIns = IdInsumo FROM @nuevoIns;
+
+EXEC sp_Insumo_Actualizar
+    @IdInsumo = @idIns, @Descripcion = 'Insumo de prueba editado', @Precio = 6.00,
+    @IdUnidadMedida = 1, @StockMinimo = 4, @Estado = 1, @Usuario = 'admin';
+
+EXEC sp_Insumo_ObtenerPorId @IdInsumo = @idIns;
+
+EXEC sp_Insumo_Eliminar @IdInsumo = @idIns, @Usuario = 'admin';
+
+EXEC sp_Insumo_Listar @Buscar = 'prueba', @Estado = NULL;
+GO
+
+-- ---------------------------------------------------------
+-- PRUEBA 10: CRUD de Usuario
+-- 10a. Usuario con nombre repetido: debe dar el error 50010
+-- ---------------------------------------------------------
+EXEC sp_Usuario_Insertar
+    @Nombres = 'Prueba', @Apellidos = 'Repetido', @NombreUsuario = 'admin',
+    @PasswordHash = 'HASH_X', @IdRol = 2, @IdLocal = 1, @Usuario = 'admin';
+GO
+
+-- 10b. Usuario nuevo valido, luego se actualiza, se cambia la clave y se da de baja
+DECLARE @nuevoUsu TABLE (IdUsuario INT);
+DECLARE @idUsu INT;
+
+INSERT INTO @nuevoUsu
+EXEC sp_Usuario_Insertar
+    @Nombres = 'Usuario', @Apellidos = 'De Prueba', @NombreUsuario = 'prueba1',
+    @PasswordHash = 'HASH_PRUEBA', @Email = 'prueba@ejemplo.com', @DNI = '70099999',
+    @IdRol = 2, @IdLocal = 1, @Usuario = 'admin';
+
+SELECT @idUsu = IdUsuario FROM @nuevoUsu;
+
+EXEC sp_Usuario_Actualizar
+    @IdUsuario = @idUsu, @Nombres = 'Usuario', @Apellidos = 'De Prueba Editado',
+    @Email = 'prueba@ejemplo.com', @DNI = '70099999', @FechaIngreso = '2026-01-01',
+    @IdRol = 2, @IdLocal = 2, @Estado = 1, @Usuario = 'admin';
+
+EXEC sp_Usuario_CambiarPassword @IdUsuario = @idUsu, @PasswordHash = 'HASH_NUEVA', @Usuario = 'admin';
+
+EXEC sp_Usuario_ObtenerPorId @IdUsuario = @idUsu;
+
+EXEC sp_Usuario_Eliminar @IdUsuario = @idUsu, @Usuario = 'admin';
+
+EXEC sp_Usuario_Listar @Buscar = 'prueba', @Estado = NULL;
+GO
+
+-- ---------------------------------------------------------
+-- PRUEBA 11: listas auxiliares para los combos
+-- ---------------------------------------------------------
+EXEC sp_CategoriaProducto_Listar;
+EXEC sp_UnidadMedida_Listar;
+EXEC sp_Rol_Listar;
+EXEC sp_Local_Listar;
+GO
+
+SELECT COUNT(*) AS Productos FROM Producto;        -- debe dar 23
+SELECT COUNT(*) AS Usuarios FROM Usuario;          -- debe dar 20
+SELECT COUNT(*) AS Movimientos FROM MovimientoStock; -- debe dar 30

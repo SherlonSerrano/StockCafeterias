@@ -1,0 +1,642 @@
+-- =========================================================
+-- SCRIPT 3 (v2) - PROCEDIMIENTOS ALMACENADOS
+-- Sistema de Control de Inventario Multi-Local (Dulce Mordida)
+-- Ejecutar DESPUES de 01_crear_bd_v2.sql y 02_datos_prueba_v2.sql
+-- Se usa CREATE OR ALTER: el script se puede volver a ejecutar
+-- sin errores de "el procedimiento ya existe".
+-- Contenido: 5 procedimientos principales + 16 de mantenimiento
+--            (Producto, Insumo, Usuario) + 4 listas auxiliares = 25.
+-- =========================================================
+USE StockCafeterias;
+GO
+
+-- =========================================================
+-- PARTE A: LOS 5 PROCEDIMIENTOS PRINCIPALES
+-- =========================================================
+
+-- ---------------------------------------------------------
+-- A1. sp_RegistrarMovimientoStock (transaccional)
+--     Tipos: E = Envio, A = Ajuste, M = Merma
+--     Valida tipo y cantidad, y evita que el stock quede negativo.
+--     Actualiza el stock del local y el stock general del insumo.
+-- ---------------------------------------------------------
+CREATE OR ALTER PROCEDURE sp_RegistrarMovimientoStock
+    @IdLocal INT,
+    @IdInsumo INT,
+    @IdUsuario INT,
+    @TipoMovimiento CHAR(1),
+    @Cantidad DECIMAL(10,2),
+    @Observacion NVARCHAR(200) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Validacion 1: solo tipos de movimiento validos
+    IF @TipoMovimiento IS NULL OR @TipoMovimiento NOT IN ('E', 'A', 'M')
+    BEGIN
+        THROW 50001, 'Tipo de movimiento no valido. Use E (Envio), A (Ajuste) o M (Merma).', 1;
+    END;
+
+    -- Validacion 2: cantidad con sentido
+    IF @Cantidad IS NULL
+       OR @Cantidad = 0
+       OR (@TipoMovimiento IN ('E', 'M') AND @Cantidad < 0)
+    BEGIN
+        THROW 50002, 'Cantidad no valida. Envio y Merma requieren valores positivos; Ajuste permite positivos o negativos, pero no cero.', 1;
+    END;
+
+    -- Cuanto se suma (o resta) al stock
+    DECLARE @Cambio DECIMAL(10,2);
+    SET @Cambio = CASE WHEN @TipoMovimiento = 'M' THEN -@Cantidad ELSE @Cantidad END;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        INSERT INTO MovimientoStock (IdLocal, IdInsumo, IdUsuario, TipoMovimiento, Cantidad, Observacion)
+        VALUES (@IdLocal, @IdInsumo, @IdUsuario, @TipoMovimiento, @Cantidad, @Observacion);
+
+        -- Si el insumo aun no tiene registro de stock en ese local, se crea en 0
+        IF NOT EXISTS (
+            SELECT 1 FROM StockLocal WITH (UPDLOCK, HOLDLOCK)
+            WHERE IdLocal = @IdLocal AND IdInsumo = @IdInsumo
+        )
+        BEGIN
+            INSERT INTO StockLocal (IdLocal, IdInsumo, CantidadActual)
+            VALUES (@IdLocal, @IdInsumo, 0);
+        END;
+
+        -- Solo actualiza si el stock resultante no queda negativo
+        UPDATE StockLocal
+        SET CantidadActual = CantidadActual + @Cambio,
+            Fecha_Ult_Modificacion = SYSDATETIME()
+        WHERE IdLocal = @IdLocal
+          AND IdInsumo = @IdInsumo
+          AND CantidadActual + @Cambio >= 0;
+
+        IF @@ROWCOUNT = 0
+        BEGIN
+            THROW 50003, 'Stock insuficiente para realizar el movimiento.', 1;
+        END;
+
+        -- Mantiene al dia el stock general del insumo (suma de todos los locales)
+        UPDATE Insumo
+        SET StockActual = StockActual + @Cambio,
+            Fecha_Ult_Modificacion = SYSDATETIME()
+        WHERE IdInsumo = @IdInsumo;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
+
+-- ---------------------------------------------------------
+-- A2. sp_CerrarDia (transaccional)
+--     Registra el cierre, guarda el detalle de cada insumo del local,
+--     marca el inventario, resuelve alertas ya recuperadas y genera
+--     alertas nuevas (B = stock bajo, S = sin stock).
+--     Devuelve el IdCierreDia creado.
+-- ---------------------------------------------------------
+CREATE OR ALTER PROCEDURE sp_CerrarDia
+    @IdLocal INT,
+    @IdUsuario INT,
+    @Observacion NVARCHAR(200) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @IdCierreDia INT;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        INSERT INTO CierreDia (IdLocal, IdUsuario, Observacion)
+        VALUES (@IdLocal, @IdUsuario, @Observacion);
+
+        SET @IdCierreDia = SCOPE_IDENTITY();
+
+        INSERT INTO DetalleCierre (IdCierreDia, IdInsumo, CantidadFinal, CantidadEsperada)
+        SELECT @IdCierreDia, sl.IdInsumo, sl.CantidadActual, sl.CantidadActual
+        FROM StockLocal sl
+        WHERE sl.IdLocal = @IdLocal AND sl.Estado = 1;
+
+        UPDATE StockLocal
+        SET FechaUltimoInventario = SYSDATETIME()
+        WHERE IdLocal = @IdLocal AND Estado = 1;
+
+        -- Alertas pendientes cuyo stock ya se recupero: se marcan como resueltas
+        UPDATE a
+        SET a.Resuelta = 1
+        FROM Alerta a
+        JOIN StockLocal sl ON sl.IdStockLocal = a.IdStockLocal
+        JOIN Insumo i ON i.IdInsumo = sl.IdInsumo
+        WHERE sl.IdLocal = @IdLocal
+          AND a.Resuelta = 0
+          AND sl.CantidadActual > i.StockMinimo;
+
+        -- Alertas nuevas (sin duplicar las que ya estan pendientes)
+        INSERT INTO Alerta (IdStockLocal, TipoAlerta)
+        SELECT sl.IdStockLocal,
+               CASE WHEN sl.CantidadActual = 0 THEN 'S' ELSE 'B' END
+        FROM StockLocal sl
+        JOIN Insumo i ON i.IdInsumo = sl.IdInsumo
+        WHERE sl.IdLocal = @IdLocal
+          AND sl.Estado = 1
+          AND i.Estado = 1
+          AND sl.CantidadActual <= i.StockMinimo
+          AND NOT EXISTS (
+              SELECT 1 FROM Alerta a
+              WHERE a.IdStockLocal = sl.IdStockLocal AND a.Resuelta = 0
+          );
+
+        COMMIT TRANSACTION;
+
+        SELECT @IdCierreDia AS IdCierreDia;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
+
+-- ---------------------------------------------------------
+-- A3. sp_ValidarLogin (para PA3)
+--     Devuelve una fila si usuario y clave son correctos y el
+--     usuario esta activo; si no, no devuelve filas.
+-- ---------------------------------------------------------
+CREATE OR ALTER PROCEDURE sp_ValidarLogin
+    @NombreUsuario NVARCHAR(50),
+    @PasswordHash NVARCHAR(200)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        u.IdUsuario,
+        u.Nombres + ' ' + u.Apellidos AS NombreCompleto,
+        u.NombreUsuario,
+        r.Nombre AS Rol,
+        u.IdLocal
+    FROM Usuario u
+    JOIN Rol r ON r.IdRol = u.IdRol
+    WHERE u.NombreUsuario = @NombreUsuario
+      AND u.PasswordHash = @PasswordHash
+      AND u.Estado = 1;
+END;
+GO
+
+-- ---------------------------------------------------------
+-- A4. sp_ReporteStockPorLocal
+--     @IdLocal = NULL devuelve todos los locales.
+-- ---------------------------------------------------------
+CREATE OR ALTER PROCEDURE sp_ReporteStockPorLocal
+    @IdLocal INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT *
+    FROM vw_StockPorLocal
+    WHERE (@IdLocal IS NULL OR IdLocal = @IdLocal)
+    ORDER BY Local, Insumo;
+END;
+GO
+
+-- ---------------------------------------------------------
+-- A5. sp_ReporteAlertasPorPeriodo (alimenta el grafico de PA4)
+--     Incluye todo el ultimo dia del rango.
+-- ---------------------------------------------------------
+CREATE OR ALTER PROCEDURE sp_ReporteAlertasPorPeriodo
+    @FechaInicio DATE,
+    @FechaFin DATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        l.Nombre AS Local,
+        CASE a.TipoAlerta WHEN 'S' THEN 'Sin stock' ELSE 'Stock bajo' END AS TipoAlerta,
+        COUNT(*) AS Total
+    FROM Alerta a
+    JOIN StockLocal sl ON sl.IdStockLocal = a.IdStockLocal
+    JOIN Local l ON l.IdLocal = sl.IdLocal
+    WHERE a.FechaAlerta >= @FechaInicio
+      AND a.FechaAlerta < DATEADD(DAY, 1, @FechaFin)
+    GROUP BY l.Nombre, a.TipoAlerta
+    ORDER BY l.Nombre, a.TipoAlerta;
+END;
+GO
+
+-- =========================================================
+-- PARTE B: LISTAS AUXILIARES (para los combos de los formularios)
+-- =========================================================
+
+CREATE OR ALTER PROCEDURE sp_CategoriaProducto_Listar
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT IdCategoria, Nombre FROM CategoriaProducto WHERE Estado = 1 ORDER BY Nombre;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_UnidadMedida_Listar
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT IdUnidadMedida, Nombre, Abreviatura FROM UnidadMedida WHERE Estado = 1 ORDER BY Nombre;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Rol_Listar
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT IdRol, Nombre FROM Rol WHERE Estado = 1 ORDER BY IdRol;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Local_Listar
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT IdLocal, Nombre FROM Local WHERE Estado = 1 ORDER BY Nombre;
+END;
+GO
+
+-- =========================================================
+-- PARTE C: MANTENIMIENTO DE PRODUCTO (CRUD de PA2)
+--   @Estado = NULL en los Listar significa "todos"
+--   Eliminar = baja logica (Estado = 0), no borra el registro
+-- =========================================================
+
+CREATE OR ALTER PROCEDURE sp_Producto_Listar
+    @Buscar NVARCHAR(100) = NULL,
+    @Estado TINYINT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        p.IdProducto, p.Nombre, p.IdCategoria, c.Nombre AS Categoria,
+        p.PrecioVenta, p.CostoPromedio, p.StockMaximo, p.Estado
+    FROM Producto p
+    JOIN CategoriaProducto c ON c.IdCategoria = p.IdCategoria
+    WHERE (@Estado IS NULL OR p.Estado = @Estado)
+      AND (@Buscar IS NULL OR p.Nombre LIKE '%' + @Buscar + '%')
+    ORDER BY p.Nombre;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Producto_ObtenerPorId
+    @IdProducto INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        p.IdProducto, p.Nombre, p.IdCategoria, c.Nombre AS Categoria,
+        p.PrecioVenta, p.CostoPromedio, p.StockMaximo, p.Foto, p.Estado
+    FROM Producto p
+    JOIN CategoriaProducto c ON c.IdCategoria = p.IdCategoria
+    WHERE p.IdProducto = @IdProducto;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Producto_Insertar
+    @Nombre NVARCHAR(100),
+    @IdCategoria INT,
+    @PrecioVenta DECIMAL(10,2),
+    @CostoPromedio DECIMAL(10,2),
+    @StockMaximo INT,
+    @Foto VARBINARY(MAX) = NULL,
+    @Usuario NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Producto (Nombre, IdCategoria, PrecioVenta, CostoPromedio, StockMaximo, Foto, Usuario_Registro)
+    VALUES (@Nombre, @IdCategoria, @PrecioVenta, @CostoPromedio, @StockMaximo, @Foto, @Usuario);
+
+    SELECT CAST(SCOPE_IDENTITY() AS INT) AS IdProducto;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Producto_Actualizar
+    @IdProducto INT,
+    @Nombre NVARCHAR(100),
+    @IdCategoria INT,
+    @PrecioVenta DECIMAL(10,2),
+    @CostoPromedio DECIMAL(10,2),
+    @StockMaximo INT,
+    @Foto VARBINARY(MAX) = NULL,
+    @Estado TINYINT,
+    @Usuario NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE Producto
+    SET Nombre = @Nombre,
+        IdCategoria = @IdCategoria,
+        PrecioVenta = @PrecioVenta,
+        CostoPromedio = @CostoPromedio,
+        StockMaximo = @StockMaximo,
+        Foto = ISNULL(@Foto, Foto),   -- si no se envia foto, se conserva la actual
+        Estado = @Estado,
+        Usuario_Ult_Modificacion = @Usuario,
+        Fecha_Ult_Modificacion = SYSDATETIME()
+    WHERE IdProducto = @IdProducto;
+
+    SELECT @@ROWCOUNT AS FilasAfectadas;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Producto_Eliminar
+    @IdProducto INT,
+    @Usuario NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE Producto
+    SET Estado = 0,
+        Usuario_Ult_Modificacion = @Usuario,
+        Fecha_Ult_Modificacion = SYSDATETIME()
+    WHERE IdProducto = @IdProducto;
+
+    SELECT @@ROWCOUNT AS FilasAfectadas;
+END;
+GO
+
+-- =========================================================
+-- PARTE D: MANTENIMIENTO DE INSUMO (CRUD de PA2)
+--   El StockActual no se edita aqui: cambia solo con
+--   sp_RegistrarMovimientoStock.
+-- =========================================================
+
+CREATE OR ALTER PROCEDURE sp_Insumo_Listar
+    @Buscar NVARCHAR(100) = NULL,
+    @Estado TINYINT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        i.IdInsumo, i.Descripcion, i.Precio, i.IdUnidadMedida,
+        um.Abreviatura AS Unidad, i.StockActual, i.StockMinimo, i.Estado
+    FROM Insumo i
+    JOIN UnidadMedida um ON um.IdUnidadMedida = i.IdUnidadMedida
+    WHERE (@Estado IS NULL OR i.Estado = @Estado)
+      AND (@Buscar IS NULL OR i.Descripcion LIKE '%' + @Buscar + '%')
+    ORDER BY i.Descripcion;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Insumo_ObtenerPorId
+    @IdInsumo INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        i.IdInsumo, i.Descripcion, i.Precio, i.IdUnidadMedida,
+        um.Nombre AS UnidadNombre, um.Abreviatura AS Unidad,
+        i.StockActual, i.StockMinimo, i.Estado
+    FROM Insumo i
+    JOIN UnidadMedida um ON um.IdUnidadMedida = i.IdUnidadMedida
+    WHERE i.IdInsumo = @IdInsumo;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Insumo_Insertar
+    @Descripcion NVARCHAR(100),
+    @Precio DECIMAL(10,2),
+    @IdUnidadMedida INT,
+    @StockMinimo DECIMAL(10,2),
+    @Usuario NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Insumo (Descripcion, Precio, IdUnidadMedida, StockActual, StockMinimo, Usuario_Registro)
+    VALUES (@Descripcion, @Precio, @IdUnidadMedida, 0, @StockMinimo, @Usuario);
+
+    SELECT CAST(SCOPE_IDENTITY() AS INT) AS IdInsumo;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Insumo_Actualizar
+    @IdInsumo INT,
+    @Descripcion NVARCHAR(100),
+    @Precio DECIMAL(10,2),
+    @IdUnidadMedida INT,
+    @StockMinimo DECIMAL(10,2),
+    @Estado TINYINT,
+    @Usuario NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE Insumo
+    SET Descripcion = @Descripcion,
+        Precio = @Precio,
+        IdUnidadMedida = @IdUnidadMedida,
+        StockMinimo = @StockMinimo,
+        Estado = @Estado,
+        Usuario_Ult_Modificacion = @Usuario,
+        Fecha_Ult_Modificacion = SYSDATETIME()
+    WHERE IdInsumo = @IdInsumo;
+
+    SELECT @@ROWCOUNT AS FilasAfectadas;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Insumo_Eliminar
+    @IdInsumo INT,
+    @Usuario NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE Insumo
+    SET Estado = 0,
+        Usuario_Ult_Modificacion = @Usuario,
+        Fecha_Ult_Modificacion = SYSDATETIME()
+    WHERE IdInsumo = @IdInsumo;
+
+    SELECT @@ROWCOUNT AS FilasAfectadas;
+END;
+GO
+
+-- =========================================================
+-- PARTE E: MANTENIMIENTO DE USUARIO (CRUD de PA2 y registro de PA3)
+--   Listar y ObtenerPorId nunca devuelven la clave.
+--   La clave solo se cambia con sp_Usuario_CambiarPassword.
+-- =========================================================
+
+CREATE OR ALTER PROCEDURE sp_Usuario_Listar
+    @Buscar NVARCHAR(100) = NULL,
+    @Estado TINYINT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        u.IdUsuario, u.Nombres, u.Apellidos, u.NombreUsuario, u.Email, u.DNI,
+        u.Telefono, u.FechaNacimiento, u.FechaIngreso,
+        u.IdRol, r.Nombre AS Rol, u.IdLocal, l.Nombre AS Local, u.Estado
+    FROM Usuario u
+    JOIN Rol r ON r.IdRol = u.IdRol
+    LEFT JOIN Local l ON l.IdLocal = u.IdLocal
+    WHERE (@Estado IS NULL OR u.Estado = @Estado)
+      AND (@Buscar IS NULL
+           OR u.Nombres LIKE '%' + @Buscar + '%'
+           OR u.Apellidos LIKE '%' + @Buscar + '%'
+           OR u.NombreUsuario LIKE '%' + @Buscar + '%')
+    ORDER BY u.Apellidos, u.Nombres;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Usuario_ObtenerPorId
+    @IdUsuario INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        u.IdUsuario, u.Nombres, u.Apellidos, u.NombreUsuario, u.Email, u.DNI,
+        u.Telefono, u.FechaNacimiento, u.FechaIngreso, u.Foto,
+        u.IdRol, r.Nombre AS Rol, u.IdLocal, l.Nombre AS Local, u.Estado
+    FROM Usuario u
+    JOIN Rol r ON r.IdRol = u.IdRol
+    LEFT JOIN Local l ON l.IdLocal = u.IdLocal
+    WHERE u.IdUsuario = @IdUsuario;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Usuario_Insertar
+    @Nombres NVARCHAR(100),
+    @Apellidos NVARCHAR(100),
+    @NombreUsuario NVARCHAR(50),
+    @PasswordHash NVARCHAR(200),
+    @Email NVARCHAR(100) = NULL,
+    @DNI CHAR(8) = NULL,
+    @Telefono NVARCHAR(15) = NULL,
+    @FechaNacimiento DATE = NULL,
+    @FechaIngreso DATE = NULL,
+    @Foto VARBINARY(MAX) = NULL,
+    @IdRol INT,
+    @IdLocal INT = NULL,
+    @Usuario NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM Usuario WHERE NombreUsuario = @NombreUsuario)
+    BEGIN
+        THROW 50010, 'El nombre de usuario ya existe.', 1;
+    END;
+
+    IF @DNI IS NOT NULL AND EXISTS (SELECT 1 FROM Usuario WHERE DNI = @DNI)
+    BEGIN
+        THROW 50011, 'Ya existe un usuario registrado con ese DNI.', 1;
+    END;
+
+    INSERT INTO Usuario (Nombres, Apellidos, NombreUsuario, PasswordHash, Email, DNI, Telefono,
+                         FechaNacimiento, FechaIngreso, Foto, IdRol, IdLocal, Usuario_Registro)
+    VALUES (@Nombres, @Apellidos, @NombreUsuario, @PasswordHash, @Email, @DNI, @Telefono,
+            @FechaNacimiento, ISNULL(@FechaIngreso, CAST(GETDATE() AS DATE)), @Foto, @IdRol, @IdLocal, @Usuario);
+
+    SELECT CAST(SCOPE_IDENTITY() AS INT) AS IdUsuario;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Usuario_Actualizar
+    @IdUsuario INT,
+    @Nombres NVARCHAR(100),
+    @Apellidos NVARCHAR(100),
+    @Email NVARCHAR(100) = NULL,
+    @DNI CHAR(8) = NULL,
+    @Telefono NVARCHAR(15) = NULL,
+    @FechaNacimiento DATE = NULL,
+    @FechaIngreso DATE,
+    @Foto VARBINARY(MAX) = NULL,
+    @IdRol INT,
+    @IdLocal INT = NULL,
+    @Estado TINYINT,
+    @Usuario NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @DNI IS NOT NULL AND EXISTS (SELECT 1 FROM Usuario WHERE DNI = @DNI AND IdUsuario <> @IdUsuario)
+    BEGIN
+        THROW 50011, 'Ya existe otro usuario registrado con ese DNI.', 1;
+    END;
+
+    UPDATE Usuario
+    SET Nombres = @Nombres,
+        Apellidos = @Apellidos,
+        Email = @Email,
+        DNI = @DNI,
+        Telefono = @Telefono,
+        FechaNacimiento = @FechaNacimiento,
+        FechaIngreso = @FechaIngreso,
+        Foto = ISNULL(@Foto, Foto),   -- si no se envia foto, se conserva la actual
+        IdRol = @IdRol,
+        IdLocal = @IdLocal,
+        Estado = @Estado,
+        Usuario_Ult_Modificacion = @Usuario,
+        Fecha_Ult_Modificacion = SYSDATETIME()
+    WHERE IdUsuario = @IdUsuario;
+
+    SELECT @@ROWCOUNT AS FilasAfectadas;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Usuario_CambiarPassword
+    @IdUsuario INT,
+    @PasswordHash NVARCHAR(200),
+    @Usuario NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE Usuario
+    SET PasswordHash = @PasswordHash,
+        Usuario_Ult_Modificacion = @Usuario,
+        Fecha_Ult_Modificacion = SYSDATETIME()
+    WHERE IdUsuario = @IdUsuario;
+
+    SELECT @@ROWCOUNT AS FilasAfectadas;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE sp_Usuario_Eliminar
+    @IdUsuario INT,
+    @Usuario NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE Usuario
+    SET Estado = 0,
+        Usuario_Ult_Modificacion = @Usuario,
+        Fecha_Ult_Modificacion = SYSDATETIME()
+    WHERE IdUsuario = @IdUsuario;
+
+    SELECT @@ROWCOUNT AS FilasAfectadas;
+END;
+GO
+
+-- ---------------------------------------------------------
+-- VERIFICACION: deben aparecer 25 procedimientos
+-- ---------------------------------------------------------
+SELECT name AS Procedimiento FROM sys.procedures ORDER BY name;
+GO

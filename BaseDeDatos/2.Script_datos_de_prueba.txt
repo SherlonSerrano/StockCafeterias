@@ -1,0 +1,332 @@
+-- =========================================================
+-- SCRIPT 2 (v2) - DATOS DE PRUEBA
+-- Sistema de Control de Inventario Multi-Local (Dulce Mordida)
+-- Ejecutar DESPUES de 01_crear_bd_v2.sql
+-- Nota: los textos van sin tildes ni enie para evitar problemas
+-- de codificacion al abrir el archivo en SSMS.
+-- =========================================================
+USE StockCafeterias;
+GO
+
+-- ---------------------------------------------------------
+-- 1. UNIDADMEDIDA (5 registros)
+--    1=Unidad, 2=Kilogramo, 3=Litro, 4=Gramo, 5=Mililitro
+-- ---------------------------------------------------------
+INSERT INTO UnidadMedida (Nombre, Abreviatura) VALUES
+('Unidad', 'und'),
+('Kilogramo', 'kg'),
+('Litro', 'lt'),
+('Gramo', 'g'),
+('Mililitro', 'ml');
+GO
+
+-- ---------------------------------------------------------
+-- 2. LOCAL (3 registros)
+-- ---------------------------------------------------------
+INSERT INTO Local (Nombre, Direccion, HorarioApertura, HorarioCierre) VALUES
+('Cafeteria Jockey Plaza', 'CC Jockey Plaza, Surco', '10:30', '20:30'),
+('Cafeteria Plaza San Miguel', 'CC Plaza San Miguel, San Miguel', '10:30', '20:30'),
+('Cafeteria Puruchuco', 'CC Puruchuco, Ate', '10:30', '20:30');
+GO
+
+-- ---------------------------------------------------------
+-- 3. CATEGORIAPRODUCTO (5 registros)
+-- ---------------------------------------------------------
+INSERT INTO CategoriaProducto (Nombre) VALUES
+('Postres y bowls'),
+('Porciones y kekes'),
+('Salados'),
+('Bebidas calientes'),
+('Bebidas frias');
+GO
+
+-- ---------------------------------------------------------
+-- 4. ROL (3 registros)
+-- ---------------------------------------------------------
+INSERT INTO Rol (Nombre) VALUES
+('Admin'),
+('Encargado de Local'),
+('Invitado');
+GO
+
+-- ---------------------------------------------------------
+-- 5. PRODUCTO (23 registros - lo que la cafeteria vende)
+--    Los precios y costos son valores de ejemplo para la prueba.
+--    Columnas: Nombre, IdCategoria, PrecioVenta, CostoPromedio, StockMaximo
+-- ---------------------------------------------------------
+INSERT INTO Producto (Nombre, IdCategoria, PrecioVenta, CostoPromedio, StockMaximo) VALUES
+('Mil hojas de fresa', 1, 14.00, 6.50, 20),
+('Merengado de fresa', 1, 13.00, 5.50, 20),
+('Alfajores banados en chocolate x12', 1, 28.00, 13.00, 15),
+('Alfajor personal', 1, 4.50, 1.80, 40),
+('Alfajores x12', 1, 24.00, 11.00, 15),
+('Torta de chocolate clasica', 1, 15.00, 6.00, 20),
+('Torta de chocolate gourmet', 1, 17.00, 7.50, 20),
+('Carrot cake', 1, 15.00, 6.00, 20),
+('Carrot cake con manjar', 1, 16.00, 6.80, 20),
+('Tartaleta de fresa', 1, 12.00, 5.00, 20),
+('Mil hojas clasico', 1, 13.00, 5.50, 20),
+('Torta de chocolate (porcion)', 2, 9.00, 3.50, 30),
+('Carrot cake clasico (porcion)', 2, 9.00, 3.50, 30),
+('Keke de platano (porcion)', 2, 6.00, 2.20, 30),
+('Keke de vainilla (porcion)', 2, 6.00, 2.20, 30),
+('Empanada de pollo', 3, 7.00, 3.00, 25),
+('Empanada de carne', 3, 7.00, 3.00, 25),
+('Cafe americano', 4, 6.00, 1.50, 100),
+('Capuccino', 4, 9.00, 2.80, 100),
+('Espresso', 4, 5.00, 1.20, 100),
+('Chocolate caliente', 4, 9.00, 3.00, 80),
+('Frappe clasico', 5, 12.00, 4.20, 60),
+('Jugo de fresa', 5, 10.00, 3.80, 60);
+GO
+
+-- ---------------------------------------------------------
+-- 6. INSUMO (25 registros - lo que realmente se controla en stock)
+--    Unidades: 1=Unidad, 2=Kilogramo, 3=Litro
+--    Precio = costo por unidad de medida. StockActual se calcula
+--    al final, sumando el stock de los 3 locales.
+--    Columnas: Descripcion, Precio, IdUnidadMedida, StockActual, StockMinimo
+-- ---------------------------------------------------------
+INSERT INTO Insumo (Descripcion, Precio, IdUnidadMedida, StockActual, StockMinimo) VALUES
+('Mil hojas de fresa (preparado)', 6.50, 1, 0, 3),
+('Merengado de fresa (preparado)', 5.50, 1, 0, 3),
+('Alfajores banados en chocolate x12 (caja)', 13.00, 1, 0, 3),
+('Alfajor personal (preparado)', 1.80, 1, 0, 8),
+('Alfajores x12 (caja)', 11.00, 1, 0, 3),
+('Torta de chocolate clasica (preparado)', 6.00, 1, 0, 3),
+('Torta de chocolate gourmet (preparado)', 7.50, 1, 0, 3),
+('Carrot cake (preparado)', 6.00, 1, 0, 3),
+('Carrot cake con manjar (preparado)', 6.80, 1, 0, 3),
+('Tartaleta de fresa (preparado)', 5.00, 1, 0, 3),
+('Mil hojas clasico (preparado)', 5.50, 1, 0, 3),
+('Torta de chocolate entera', 28.00, 1, 0, 2),
+('Carrot cake entero', 28.00, 1, 0, 2),
+('Keke de platano entero', 18.00, 1, 0, 2),
+('Keke de vainilla entero', 18.00, 1, 0, 2),
+('Empanada de pollo', 3.00, 1, 0, 5),
+('Empanada de carne', 3.00, 1, 0, 5),
+('Cafe en grano', 60.00, 2, 0, 2),
+('Leche entera', 4.00, 3, 0, 6),
+('Chocolate en polvo', 35.00, 2, 0, 1),
+('Fruta congelada de fresa', 18.00, 2, 0, 2),
+('Base para frappe', 22.00, 2, 0, 1),
+('Vaso descartable', 0.15, 1, 0, 100),
+('Tapa para vaso', 0.08, 1, 0, 100),
+('Sobre de azucar', 0.05, 1, 0, 100);
+GO
+
+-- ---------------------------------------------------------
+-- 7. RECETA (38 registros)
+--    Que insumos y que cantidad consume cada producto.
+--    Se usa la misma unidad del insumo: 0.018 kg de cafe = 18 g.
+--    Columnas: IdProducto, IdInsumo, CantidadRequerida, IdUnidadMedida
+-- ---------------------------------------------------------
+INSERT INTO Receta (IdProducto, IdInsumo, CantidadRequerida, IdUnidadMedida) VALUES
+-- Bowls (productos 1 a 11): cada uno consume 1 unidad de su insumo preparado
+(1, 1, 1, 1), (2, 2, 1, 1), (3, 3, 1, 1), (4, 4, 1, 1), (5, 5, 1, 1), (6, 6, 1, 1),
+(7, 7, 1, 1), (8, 8, 1, 1), (9, 9, 1, 1), (10, 10, 1, 1), (11, 11, 1, 1),
+-- Porciones: cada una consume 1/8 (0.125) del producto entero
+(12, 12, 0.125, 1), (13, 13, 0.125, 1), (14, 14, 0.125, 1), (15, 15, 0.125, 1),
+-- Empanadas
+(16, 16, 1, 1), (17, 17, 1, 1),
+-- Cafe americano
+(18, 18, 0.018, 2), (18, 23, 1, 1), (18, 24, 1, 1),
+-- Capuccino
+(19, 18, 0.018, 2), (19, 19, 0.150, 3), (19, 23, 1, 1), (19, 24, 1, 1),
+-- Espresso
+(20, 18, 0.018, 2), (20, 25, 1, 1),
+-- Chocolate caliente
+(21, 20, 0.030, 2), (21, 19, 0.200, 3), (21, 23, 1, 1), (21, 24, 1, 1),
+-- Frappe clasico
+(22, 18, 0.018, 2), (22, 19, 0.100, 3), (22, 22, 0.060, 2), (22, 23, 1, 1), (22, 24, 1, 1),
+-- Jugo de fresa
+(23, 21, 0.150, 2), (23, 23, 1, 1), (23, 24, 1, 1);
+GO
+
+-- ---------------------------------------------------------
+-- 8. USUARIO (20 registros: 1 admin, 18 encargados, 1 invitado)
+--    IdRol: 1=Admin, 2=Encargado, 3=Invitado
+--    IdLocal: 1=Jockey Plaza, 2=Plaza San Miguel, 3=Puruchuco
+--    Los nombres, DNI, correos y telefonos son ficticios.
+--    PasswordHash es un valor temporal; el hash real se genera desde C#.
+-- ---------------------------------------------------------
+INSERT INTO Usuario (Nombres, Apellidos, NombreUsuario, PasswordHash, Email, DNI, Telefono, FechaNacimiento, FechaIngreso, IdRol, IdLocal) VALUES
+('Administrador', 'General', 'admin', 'HASH_TEMP_000', 'admin@ejemplo.com', '70010001', '987000001', '1990-05-12', '2024-01-15', 1, NULL),
+('Rosa', 'Quispe Huaman', 'jockey1', 'HASH_TEMP_001', 'rosa.quispe@ejemplo.com', '70010002', '987000002', '1995-03-21', '2025-02-03', 2, 1),
+('Luis', 'Ramirez Torres', 'jockey2', 'HASH_TEMP_002', 'luis.ramirez@ejemplo.com', '70010003', '987000003', '1993-07-08', '2025-02-10', 2, 1),
+('Maria', 'Flores Castillo', 'jockey3', 'HASH_TEMP_003', 'maria.flores@ejemplo.com', '70010004', '987000004', '1997-11-30', '2025-03-01', 2, 1),
+('Carlos', 'Mendoza Rojas', 'jockey4', 'HASH_TEMP_004', 'carlos.mendoza@ejemplo.com', '70010005', '987000005', '1992-01-17', '2025-03-15', 2, 1),
+('Ana', 'Vargas Salazar', 'jockey5', 'HASH_TEMP_005', 'ana.vargas@ejemplo.com', '70010006', '987000006', '1998-09-25', '2025-04-02', 2, 1),
+('Jorge', 'Paredes Linares', 'jockey6', 'HASH_TEMP_006', 'jorge.paredes@ejemplo.com', '70010007', '987000007', '1994-12-04', '2025-04-20', 2, 1),
+('Lucia', 'Gutierrez Chavez', 'sanmiguel1', 'HASH_TEMP_007', 'lucia.gutierrez@ejemplo.com', '70010008', '987000008', '1996-06-14', '2025-02-05', 2, 2),
+('Pedro', 'Cardenas Diaz', 'sanmiguel2', 'HASH_TEMP_008', 'pedro.cardenas@ejemplo.com', '70010009', '987000009', '1991-08-19', '2025-02-12', 2, 2),
+('Carmen', 'Soto Rios', 'sanmiguel3', 'HASH_TEMP_009', 'carmen.soto@ejemplo.com', '70010010', '987000010', '1999-02-02', '2025-03-03', 2, 2),
+('Miguel', 'Huerta Leon', 'sanmiguel4', 'HASH_TEMP_010', 'miguel.huerta@ejemplo.com', '70010011', '987000011', '1993-10-27', '2025-03-18', 2, 2),
+('Patricia', 'Navarro Vega', 'sanmiguel5', 'HASH_TEMP_011', 'patricia.navarro@ejemplo.com', '70010012', '987000012', '1995-04-09', '2025-04-07', 2, 2),
+('Diego', 'Salinas Cruz', 'sanmiguel6', 'HASH_TEMP_012', 'diego.salinas@ejemplo.com', '70010013', '987000013', '1997-12-22', '2025-05-05', 2, 2),
+('Elena', 'Campos Ponce', 'puruchuco1', 'HASH_TEMP_013', 'elena.campos@ejemplo.com', '70010014', '987000014', '1994-03-03', '2025-01-20', 2, 3),
+('Raul', 'Medina Aguirre', 'puruchuco2', 'HASH_TEMP_014', 'raul.medina@ejemplo.com', '70010015', '987000015', '1990-09-16', '2025-01-27', 2, 3),
+('Sofia', 'Peralta Nunez', 'puruchuco3', 'HASH_TEMP_015', 'sofia.peralta@ejemplo.com', '70010016', '987000016', '1998-05-28', '2025-02-17', 2, 3),
+('Andres', 'Vilca Mamani', 'puruchuco4', 'HASH_TEMP_016', 'andres.vilca@ejemplo.com', '70010017', '987000017', '1996-01-11', '2025-03-10', 2, 3),
+('Daniela', 'Rivas Cortez', 'puruchuco5', 'HASH_TEMP_017', 'daniela.rivas@ejemplo.com', '70010018', '987000018', '1999-07-23', '2025-04-14', 2, 3),
+('Fernando', 'Ortiz Bravo', 'puruchuco6', 'HASH_TEMP_018', 'fernando.ortiz@ejemplo.com', '70010019', '987000019', '1992-11-05', '2025-05-12', 2, 3),
+('Invitado', 'Sistema', 'invitado1', 'HASH_TEMP_019', 'invitado@ejemplo.com', '70010020', '987000020', '2000-01-01', '2025-06-01', 3, NULL);
+GO
+
+-- ---------------------------------------------------------
+-- 9. STOCKLOCAL (75 registros = 3 locales x 25 insumos)
+--    Se genera el stock de cada insumo en cada local con una regla
+--    sencilla por tipo de insumo. Luego se bajan a proposito
+--    8 registros para que existan alertas de stock bajo / sin stock.
+-- ---------------------------------------------------------
+INSERT INTO StockLocal (IdLocal, IdInsumo, CantidadActual, Ubicacion, FechaUltimoInventario)
+SELECT
+    l.IdLocal,
+    i.IdInsumo,
+    CASE
+        WHEN i.IdInsumo >= 23 THEN 200 + 50 * l.IdLocal          -- vasos, tapas, sobres
+        WHEN i.IdUnidadMedida = 1 THEN 8 + 2 * l.IdLocal + (i.IdInsumo % 4)  -- productos por unidad
+        WHEN i.IdUnidadMedida = 2 THEN 6 + 2 * l.IdLocal          -- insumos en kg
+        ELSE 20 + 5 * l.IdLocal                                    -- insumos en litros
+    END,
+    CASE
+        WHEN i.IdInsumo <= 17 THEN 'Vitrina'
+        WHEN i.IdInsumo <= 22 THEN 'Almacen'
+        ELSE 'Mostrador'
+    END,
+    DATEADD(DAY, -l.IdLocal, SYSDATETIME())
+FROM Local l
+CROSS JOIN Insumo i;
+GO
+
+-- Stock bajo o agotado a proposito (para probar alertas)
+UPDATE StockLocal SET CantidadActual = 0    WHERE IdLocal = 1 AND IdInsumo = 6;   -- Torta chocolate clasica, Jockey: sin stock
+UPDATE StockLocal SET CantidadActual = 2    WHERE IdLocal = 2 AND IdInsumo = 8;   -- Carrot cake, San Miguel: bajo
+UPDATE StockLocal SET CantidadActual = 0    WHERE IdLocal = 3 AND IdInsumo = 16;  -- Empanada de pollo, Puruchuco: sin stock
+UPDATE StockLocal SET CantidadActual = 1.50 WHERE IdLocal = 3 AND IdInsumo = 18;  -- Cafe en grano, Puruchuco: bajo
+UPDATE StockLocal SET CantidadActual = 40   WHERE IdLocal = 2 AND IdInsumo = 23;  -- Vasos, San Miguel: bajo
+UPDATE StockLocal SET CantidadActual = 0    WHERE IdLocal = 1 AND IdInsumo = 21;  -- Fruta congelada, Jockey: sin stock
+UPDATE StockLocal SET CantidadActual = 2    WHERE IdLocal = 1 AND IdInsumo = 10;  -- Tartaleta de fresa, Jockey: bajo
+UPDATE StockLocal SET CantidadActual = 5    WHERE IdLocal = 2 AND IdInsumo = 19;  -- Leche, San Miguel: bajo
+GO
+
+-- El stock general de cada insumo = suma de lo que hay en los 3 locales
+UPDATE Insumo
+SET StockActual = (SELECT ISNULL(SUM(sl.CantidadActual), 0)
+                   FROM StockLocal sl
+                   WHERE sl.IdInsumo = Insumo.IdInsumo);
+GO
+
+-- ---------------------------------------------------------
+-- 10. MOVIMIENTOSTOCK (30 registros)
+--     Se generan 30 filas numeradas (N.i) y para cada una se elige:
+--     local, insumo, usuario del mismo local, tipo (E, A, M) y cantidad
+--     segun la unidad del insumo. Fechas: los ultimos 30 dias.
+-- ---------------------------------------------------------
+;WITH N AS (
+    SELECT TOP (30) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS i
+    FROM sys.all_objects
+)
+INSERT INTO MovimientoStock (IdLocal, IdInsumo, IdUsuario, TipoMovimiento, Cantidad, FechaMovimiento, Observacion)
+SELECT
+    ((N.i - 1) % 3) + 1,
+    ins.IdInsumo,
+    2 + ((N.i - 1) % 3) * 6 + (((N.i - 1) / 3) % 6),
+    CASE ((N.i - 1) / 3) % 3 WHEN 0 THEN 'E' WHEN 1 THEN 'A' ELSE 'M' END,
+    CASE ins.IdUnidadMedida
+        WHEN 1 THEN 1 + (N.i % 10)
+        WHEN 2 THEN 2 + (N.i % 5)
+        ELSE 5 + (N.i % 5)
+    END,
+    DATEADD(DAY, -N.i, SYSDATETIME()),
+    CONCAT('Movimiento de prueba #', N.i)
+FROM N
+JOIN Insumo ins ON ins.IdInsumo = ((N.i - 1) % 25) + 1;
+GO
+
+-- ---------------------------------------------------------
+-- 11. CIERREDIA (21 registros: 7 por local, uno por dia)
+-- ---------------------------------------------------------
+;WITH N AS (
+    SELECT TOP (21) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS i
+    FROM sys.all_objects
+)
+INSERT INTO CierreDia (IdLocal, IdUsuario, FechaCierre, Observacion)
+SELECT
+    ((N.i - 1) % 3) + 1,
+    2 + ((N.i - 1) % 3) * 6 + (((N.i - 1) / 3) % 6),
+    DATEADD(DAY, -(((N.i - 1) / 3) + 1), SYSDATETIME()),
+    CONCAT('Cierre de prueba #', N.i)
+FROM N;
+GO
+
+-- ---------------------------------------------------------
+-- 12. DETALLECIERRE (63 registros: 3 insumos por cada cierre)
+--     En la tercera fila de cada cierre la cantidad esperada es
+--     mayor que la contada, para simular una diferencia.
+-- ---------------------------------------------------------
+INSERT INTO DetalleCierre (IdCierreDia, IdInsumo, CantidadFinal, CantidadEsperada)
+SELECT
+    cd.IdCierreDia,
+    ins.IdInsumo,
+    f.Cant,
+    f.Cant + CASE WHEN n.Valor = 2 THEN (CASE ins.IdUnidadMedida WHEN 1 THEN 1 ELSE 0.5 END) ELSE 0 END
+FROM CierreDia cd
+CROSS JOIN (VALUES (0), (1), (2)) n(Valor)
+JOIN Insumo ins ON ins.IdInsumo = ((cd.IdCierreDia * 3 + n.Valor) % 25) + 1
+CROSS APPLY (
+    SELECT CASE ins.IdUnidadMedida
+        WHEN 1 THEN 5 + (cd.IdCierreDia % 8)
+        WHEN 2 THEN 4 + (cd.IdCierreDia % 5)
+        ELSE 10 + (cd.IdCierreDia % 6)
+    END AS Cant
+) f;
+GO
+
+-- ---------------------------------------------------------
+-- 13. ALERTA (23 registros, relacionadas a StockLocal)
+--     Historial de alertas: se toman los registros de StockLocal
+--     cuyo id es multiplo de 3.
+--     B = Stock bajo, S = Sin stock
+-- ---------------------------------------------------------
+;WITH S AS (
+    SELECT IdStockLocal, ROW_NUMBER() OVER (ORDER BY IdStockLocal) AS rn
+    FROM StockLocal
+    WHERE IdStockLocal % 3 = 0
+)
+INSERT INTO Alerta (IdStockLocal, TipoAlerta, FechaAlerta, Resuelta)
+SELECT
+    IdStockLocal,
+    CASE WHEN rn % 4 = 0 THEN 'S' ELSE 'B' END,
+    DATEADD(DAY, -rn, SYSDATETIME()),
+    CASE WHEN rn % 3 = 0 THEN 1 ELSE 0 END
+FROM S
+WHERE rn <= 23;
+GO
+
+-- ---------------------------------------------------------
+-- VERIFICACION FINAL: conteo de filas por tabla
+-- Esperado: Local 3, UnidadMedida 5, CategoriaProducto 5, Rol 3,
+-- Producto 23, Insumo 25, Receta 38, Usuario 20, StockLocal 75,
+-- MovimientoStock 30, CierreDia 21, DetalleCierre 63, Alerta 23
+-- ---------------------------------------------------------
+SELECT 'Local' AS Tabla, COUNT(*) AS Filas FROM Local
+UNION ALL SELECT 'UnidadMedida', COUNT(*) FROM UnidadMedida
+UNION ALL SELECT 'CategoriaProducto', COUNT(*) FROM CategoriaProducto
+UNION ALL SELECT 'Rol', COUNT(*) FROM Rol
+UNION ALL SELECT 'Producto', COUNT(*) FROM Producto
+UNION ALL SELECT 'Insumo', COUNT(*) FROM Insumo
+UNION ALL SELECT 'Receta', COUNT(*) FROM Receta
+UNION ALL SELECT 'Usuario', COUNT(*) FROM Usuario
+UNION ALL SELECT 'StockLocal', COUNT(*) FROM StockLocal
+UNION ALL SELECT 'MovimientoStock', COUNT(*) FROM MovimientoStock
+UNION ALL SELECT 'CierreDia', COUNT(*) FROM CierreDia
+UNION ALL SELECT 'DetalleCierre', COUNT(*) FROM DetalleCierre
+UNION ALL SELECT 'Alerta', COUNT(*) FROM Alerta;
+GO
+
+-- Las vistas deben devolver datos: la de alertas debe mostrar 8 filas
+SELECT * FROM vw_AlertasStockActual;
+SELECT TOP (5) * FROM vw_StockPorLocal;
+SELECT TOP (5) * FROM vw_MovimientosDetallado;
+GO

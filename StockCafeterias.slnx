@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="StockCafeterias.Datos/StockCafeterias.Datos.csproj" />
+  <Project Path="StockCafeterias.Entidades/StockCafeterias.Entidades.csproj" />
+  <Project Path="StockCafeterias.Negocio/StockCafeterias.Negocio.csproj" />
+  <Project Path="StockCafeterias.Windows/StockCafeterias.Windows.csproj" />
+</Solution>

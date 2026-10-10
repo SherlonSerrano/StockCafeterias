@@ -1,0 +1,340 @@
+-- =========================================================
+-- SCRIPT 1 (v2) - CREACION DE BASE DE DATOS, TABLAS Y VISTAS
+-- Sistema de Control de Inventario Multi-Local (Dulce Mordida)
+-- Incluye las correcciones de la revision de PA1:
+--   * CategoriaProducto, Insumo y Receta (nuevas)
+--   * StockLocal, MovimientoStock y DetalleCierre ahora usan Insumo
+--   * Alerta relacionada a StockLocal
+--   * Estados y tipos como TINYINT / CHAR(1)
+--   * Campos de auditoria en tablas principales
+--   * 3 vistas
+-- =========================================================
+
+-- ---------------------------------------------------------
+-- 0. ELIMINAR LA BASE ANTERIOR (si existe) Y CREAR LA NUEVA
+--    ADVERTENCIA: esto borra la version anterior de
+--    StockCafeterias, incluidos sus archivos .mdf/.ldf.
+--    Los archivos se crean en la carpeta por defecto de SQL Server
+--    (la misma donde estan los archivos de la base actual).
+-- ---------------------------------------------------------
+USE master;
+GO
+
+IF DB_ID('StockCafeterias') IS NOT NULL
+BEGIN
+    ALTER DATABASE StockCafeterias SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE StockCafeterias;
+END
+GO
+
+CREATE DATABASE StockCafeterias
+ON PRIMARY (NAME = StockCafeterias_Data, FILENAME = 'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\StockCafeterias.mdf')
+LOG ON (NAME = StockCafeterias_Log, FILENAME = 'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\StockCafeterias_log.ldf');
+GO
+
+USE StockCafeterias;
+GO
+
+-- ---------------------------------------------------------
+-- 1. LOCAL
+-- ---------------------------------------------------------
+CREATE TABLE Local (
+    IdLocal INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre NVARCHAR(100) NOT NULL,
+    Direccion NVARCHAR(200) NULL,
+    HorarioApertura TIME NOT NULL,
+    HorarioCierre TIME NOT NULL,
+    Usuario_Registro NVARCHAR(50) NOT NULL DEFAULT 'admin',
+    Fecha_Registro DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    Usuario_Ult_Modificacion NVARCHAR(50) NULL,
+    Fecha_Ult_Modificacion DATETIME2 NULL,
+    Estado TINYINT NOT NULL DEFAULT 1
+);
+GO
+
+-- ---------------------------------------------------------
+-- 2. UNIDADMEDIDA
+-- ---------------------------------------------------------
+CREATE TABLE UnidadMedida (
+    IdUnidadMedida INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre NVARCHAR(30) NOT NULL,
+    Abreviatura NVARCHAR(10) NOT NULL,
+    Usuario_Registro NVARCHAR(50) NOT NULL DEFAULT 'admin',
+    Fecha_Registro DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    Usuario_Ult_Modificacion NVARCHAR(50) NULL,
+    Fecha_Ult_Modificacion DATETIME2 NULL,
+    Estado TINYINT NOT NULL DEFAULT 1
+);
+GO
+
+-- ---------------------------------------------------------
+-- 3. CATEGORIAPRODUCTO (nueva)
+-- ---------------------------------------------------------
+CREATE TABLE CategoriaProducto (
+    IdCategoria INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre NVARCHAR(50) NOT NULL UNIQUE,
+    Usuario_Registro NVARCHAR(50) NOT NULL DEFAULT 'admin',
+    Fecha_Registro DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    Usuario_Ult_Modificacion NVARCHAR(50) NULL,
+    Fecha_Ult_Modificacion DATETIME2 NULL,
+    Estado TINYINT NOT NULL DEFAULT 1
+);
+GO
+
+-- ---------------------------------------------------------
+-- 4. PRODUCTO (lo que la cafeteria vende)
+-- ---------------------------------------------------------
+CREATE TABLE Producto (
+    IdProducto INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre NVARCHAR(100) NOT NULL,
+    IdCategoria INT NOT NULL,
+    PrecioVenta DECIMAL(10,2) NOT NULL DEFAULT 0,
+    CostoPromedio DECIMAL(10,2) NOT NULL DEFAULT 0,
+    StockMaximo INT NOT NULL DEFAULT 0,
+    Foto VARBINARY(MAX) NULL,
+    Usuario_Registro NVARCHAR(50) NOT NULL DEFAULT 'admin',
+    Fecha_Registro DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    Usuario_Ult_Modificacion NVARCHAR(50) NULL,
+    Fecha_Ult_Modificacion DATETIME2 NULL,
+    Estado TINYINT NOT NULL DEFAULT 1,
+    FOREIGN KEY (IdCategoria) REFERENCES CategoriaProducto(IdCategoria)
+);
+GO
+
+-- ---------------------------------------------------------
+-- 5. INSUMO (materia prima / mercaderia que se controla en stock)
+-- ---------------------------------------------------------
+CREATE TABLE Insumo (
+    IdInsumo INT IDENTITY(1,1) PRIMARY KEY,
+    Descripcion NVARCHAR(100) NOT NULL,
+    Precio DECIMAL(10,2) NOT NULL DEFAULT 0,
+    IdUnidadMedida INT NOT NULL,
+    StockActual DECIMAL(10,2) NOT NULL DEFAULT 0,
+    StockMinimo DECIMAL(10,2) NOT NULL DEFAULT 0,
+    Usuario_Registro NVARCHAR(50) NOT NULL DEFAULT 'admin',
+    Fecha_Registro DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    Usuario_Ult_Modificacion NVARCHAR(50) NULL,
+    Fecha_Ult_Modificacion DATETIME2 NULL,
+    Estado TINYINT NOT NULL DEFAULT 1,
+    FOREIGN KEY (IdUnidadMedida) REFERENCES UnidadMedida(IdUnidadMedida)
+);
+GO
+
+-- ---------------------------------------------------------
+-- 6. RECETA (relacion muchos a muchos Producto - Insumo)
+-- ---------------------------------------------------------
+CREATE TABLE Receta (
+    IdProducto INT NOT NULL,
+    IdInsumo INT NOT NULL,
+    CantidadRequerida DECIMAL(10,3) NOT NULL CHECK (CantidadRequerida > 0),
+    IdUnidadMedida INT NOT NULL,
+    Estado TINYINT NOT NULL DEFAULT 1,
+    PRIMARY KEY (IdProducto, IdInsumo),
+    FOREIGN KEY (IdProducto) REFERENCES Producto(IdProducto),
+    FOREIGN KEY (IdInsumo) REFERENCES Insumo(IdInsumo),
+    FOREIGN KEY (IdUnidadMedida) REFERENCES UnidadMedida(IdUnidadMedida)
+);
+GO
+
+-- ---------------------------------------------------------
+-- 7. ROL
+-- ---------------------------------------------------------
+CREATE TABLE Rol (
+    IdRol INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre NVARCHAR(30) NOT NULL,
+    Usuario_Registro NVARCHAR(50) NOT NULL DEFAULT 'admin',
+    Fecha_Registro DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    Usuario_Ult_Modificacion NVARCHAR(50) NULL,
+    Fecha_Ult_Modificacion DATETIME2 NULL,
+    Estado TINYINT NOT NULL DEFAULT 1
+);
+GO
+
+-- ---------------------------------------------------------
+-- 8. USUARIO
+-- ---------------------------------------------------------
+CREATE TABLE Usuario (
+    IdUsuario INT IDENTITY(1,1) PRIMARY KEY,
+    Nombres NVARCHAR(100) NOT NULL,
+    Apellidos NVARCHAR(100) NOT NULL,
+    NombreUsuario NVARCHAR(50) NOT NULL UNIQUE,
+    PasswordHash NVARCHAR(200) NOT NULL,
+    Email NVARCHAR(100) NULL,
+    DNI CHAR(8) NULL,
+    Telefono NVARCHAR(15) NULL,
+    FechaNacimiento DATE NULL,
+    FechaIngreso DATE NOT NULL DEFAULT (CAST(GETDATE() AS DATE)),
+    Foto VARBINARY(MAX) NULL,
+    IdRol INT NOT NULL,
+    IdLocal INT NULL,
+    Usuario_Registro NVARCHAR(50) NOT NULL DEFAULT 'admin',
+    Fecha_Registro DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    Usuario_Ult_Modificacion NVARCHAR(50) NULL,
+    Fecha_Ult_Modificacion DATETIME2 NULL,
+    Estado TINYINT NOT NULL DEFAULT 1,
+    FOREIGN KEY (IdRol) REFERENCES Rol(IdRol),
+    FOREIGN KEY (IdLocal) REFERENCES Local(IdLocal)
+);
+GO
+
+-- El DNI no se puede repetir, pero se permite que varios usuarios no lo tengan
+CREATE UNIQUE INDEX UX_Usuario_DNI ON Usuario(DNI) WHERE DNI IS NOT NULL;
+GO
+
+-- ---------------------------------------------------------
+-- 9. STOCKLOCAL (stock de cada insumo en cada local)
+-- ---------------------------------------------------------
+CREATE TABLE StockLocal (
+    IdStockLocal INT IDENTITY(1,1) PRIMARY KEY,
+    IdLocal INT NOT NULL,
+    IdInsumo INT NOT NULL,
+    CantidadActual DECIMAL(10,2) NOT NULL DEFAULT 0,
+    Ubicacion NVARCHAR(50) NULL,
+    FechaUltimoInventario DATETIME2 NULL,
+    Usuario_Registro NVARCHAR(50) NOT NULL DEFAULT 'admin',
+    Fecha_Registro DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    Usuario_Ult_Modificacion NVARCHAR(50) NULL,
+    Fecha_Ult_Modificacion DATETIME2 NULL,
+    Estado TINYINT NOT NULL DEFAULT 1,
+    FOREIGN KEY (IdLocal) REFERENCES Local(IdLocal),
+    FOREIGN KEY (IdInsumo) REFERENCES Insumo(IdInsumo),
+    CONSTRAINT UQ_LocalInsumo UNIQUE (IdLocal, IdInsumo)
+);
+GO
+
+-- ---------------------------------------------------------
+-- 10. MOVIMIENTOSTOCK
+--     TipoMovimiento: E = Envio, A = Ajuste, M = Merma
+-- ---------------------------------------------------------
+CREATE TABLE MovimientoStock (
+    IdMovimiento INT IDENTITY(1,1) PRIMARY KEY,
+    IdLocal INT NOT NULL,
+    IdInsumo INT NOT NULL,
+    IdUsuario INT NOT NULL,
+    TipoMovimiento CHAR(1) NOT NULL CHECK (TipoMovimiento IN ('E','A','M')),
+    Cantidad DECIMAL(10,2) NOT NULL,
+    FechaMovimiento DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    Observacion NVARCHAR(200) NULL,
+    FOREIGN KEY (IdLocal) REFERENCES Local(IdLocal),
+    FOREIGN KEY (IdInsumo) REFERENCES Insumo(IdInsumo),
+    FOREIGN KEY (IdUsuario) REFERENCES Usuario(IdUsuario)
+);
+GO
+
+-- ---------------------------------------------------------
+-- 11. CIERREDIA
+-- ---------------------------------------------------------
+CREATE TABLE CierreDia (
+    IdCierreDia INT IDENTITY(1,1) PRIMARY KEY,
+    IdLocal INT NOT NULL,
+    IdUsuario INT NOT NULL,
+    FechaCierre DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    Observacion NVARCHAR(200) NULL,
+    Estado TINYINT NOT NULL DEFAULT 1,
+    FOREIGN KEY (IdLocal) REFERENCES Local(IdLocal),
+    FOREIGN KEY (IdUsuario) REFERENCES Usuario(IdUsuario)
+);
+GO
+
+-- ---------------------------------------------------------
+-- 12. DETALLECIERRE
+-- ---------------------------------------------------------
+CREATE TABLE DetalleCierre (
+    IdDetalleCierre INT IDENTITY(1,1) PRIMARY KEY,
+    IdCierreDia INT NOT NULL,
+    IdInsumo INT NOT NULL,
+    CantidadFinal DECIMAL(10,2) NOT NULL,
+    CantidadEsperada DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (IdCierreDia) REFERENCES CierreDia(IdCierreDia),
+    FOREIGN KEY (IdInsumo) REFERENCES Insumo(IdInsumo)
+);
+GO
+
+-- ---------------------------------------------------------
+-- 13. ALERTA (historial, relacionada a StockLocal)
+--     TipoAlerta: B = Stock bajo, S = Sin stock
+--     Resuelta: 0 = pendiente, 1 = resuelta
+-- ---------------------------------------------------------
+CREATE TABLE Alerta (
+    IdAlerta INT IDENTITY(1,1) PRIMARY KEY,
+    IdStockLocal INT NOT NULL,
+    TipoAlerta CHAR(1) NOT NULL CHECK (TipoAlerta IN ('B','S')),
+    FechaAlerta DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    Resuelta TINYINT NOT NULL DEFAULT 0,
+    FOREIGN KEY (IdStockLocal) REFERENCES StockLocal(IdStockLocal)
+);
+GO
+
+-- =========================================================
+-- VISTAS
+-- =========================================================
+
+-- Vista 1: alertas de stock en tiempo real (se calculan, no se guardan)
+CREATE VIEW vw_AlertasStockActual AS
+SELECT
+    sl.IdStockLocal,
+    l.Nombre AS Local,
+    i.Descripcion AS Insumo,
+    sl.CantidadActual,
+    i.StockMinimo,
+    um.Abreviatura AS Unidad,
+    CASE WHEN sl.CantidadActual = 0 THEN 'S' ELSE 'B' END AS TipoAlerta,
+    CASE WHEN sl.CantidadActual = 0 THEN 'Sin stock' ELSE 'Stock bajo' END AS DescripcionAlerta
+FROM StockLocal sl
+JOIN Local l ON l.IdLocal = sl.IdLocal
+JOIN Insumo i ON i.IdInsumo = sl.IdInsumo
+JOIN UnidadMedida um ON um.IdUnidadMedida = i.IdUnidadMedida
+WHERE sl.CantidadActual <= i.StockMinimo
+  AND sl.Estado = 1
+  AND i.Estado = 1;
+GO
+
+-- Vista 2: stock de cada insumo por local
+CREATE VIEW vw_StockPorLocal AS
+SELECT
+    l.IdLocal,
+    l.Nombre AS Local,
+    i.IdInsumo,
+    i.Descripcion AS Insumo,
+    sl.CantidadActual,
+    um.Abreviatura AS Unidad,
+    i.StockMinimo,
+    sl.Ubicacion,
+    sl.FechaUltimoInventario
+FROM StockLocal sl
+JOIN Local l ON l.IdLocal = sl.IdLocal
+JOIN Insumo i ON i.IdInsumo = sl.IdInsumo
+JOIN UnidadMedida um ON um.IdUnidadMedida = i.IdUnidadMedida
+WHERE sl.Estado = 1;
+GO
+
+-- Vista 3: historial de movimientos con nombres legibles
+CREATE VIEW vw_MovimientosDetallado AS
+SELECT
+    m.IdMovimiento,
+    m.FechaMovimiento,
+    l.Nombre AS Local,
+    i.Descripcion AS Insumo,
+    CASE m.TipoMovimiento
+        WHEN 'E' THEN 'Envio'
+        WHEN 'A' THEN 'Ajuste'
+        WHEN 'M' THEN 'Merma'
+    END AS TipoMovimiento,
+    m.Cantidad,
+    um.Abreviatura AS Unidad,
+    u.Nombres + ' ' + u.Apellidos AS Usuario,
+    m.Observacion
+FROM MovimientoStock m
+JOIN Local l ON l.IdLocal = m.IdLocal
+JOIN Insumo i ON i.IdInsumo = m.IdInsumo
+JOIN UnidadMedida um ON um.IdUnidadMedida = i.IdUnidadMedida
+JOIN Usuario u ON u.IdUsuario = m.IdUsuario;
+GO
+
+-- ---------------------------------------------------------
+-- VERIFICACION: deben aparecer 13 tablas y 3 vistas
+-- ---------------------------------------------------------
+SELECT name AS Tabla FROM sys.tables ORDER BY name;
+SELECT name AS Vista FROM sys.views ORDER BY name;
+GO
+
