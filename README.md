@@ -83,11 +83,11 @@ Las clases de `Entidades/Modelos` se generaron con `Scaffold-DbContext` y luego 
 
 | Tarea | Estado | Responsable |
 |---|---|---|
-| Base de datos (13 tablas, 3 vistas, 25 procedimientos) | Listo | |
-| Estructura N-Capas, `Conexion` y `StockCafeteriasContext` | Listo | |
-| `ProductoRepositorio` y sus pruebas | Listo | |
-| `InsumoRepositorio` y sus clases de `Listados` | Pendiente | |
-| `UsuarioRepositorio` y sus clases de `Listados` | Pendiente | |
+| Base de datos (13 tablas, 3 vistas, 25 procedimientos) | Listo | Sherlon |
+| Estructura N-Capas, `Conexion` y `StockCafeteriasContext` | Listo | Sherlon |
+| `ProductoRepositorio` y sus pruebas | Listo | Sherlon |
+| `InsumoRepositorio` y sus clases de `Listados` | Listo | Renato |
+| `UsuarioRepositorio` y sus clases de `Listados` | Listo | Renato |
 | Repositorios de listas auxiliares (Categoría, Unidad de medida, Rol, Local) | Pendiente | |
 | Capa de Negocio (validaciones de Producto, Insumo y Usuario) | Pendiente | |
 | Menú principal | Pendiente | |
