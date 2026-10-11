@@ -2,5 +2,6 @@
   <Project Path="StockCafeterias.Datos/StockCafeterias.Datos.csproj" />
   <Project Path="StockCafeterias.Entidades/StockCafeterias.Entidades.csproj" />
   <Project Path="StockCafeterias.Negocio/StockCafeterias.Negocio.csproj" />
+  <Project Path="StockCafeterias.Pruebas/StockCafeterias.Pruebas.csproj" Id="915e7beb-5df8-4efe-b2e8-79a5014db227" />
   <Project Path="StockCafeterias.Windows/StockCafeterias.Windows.csproj" />
 </Solution>
