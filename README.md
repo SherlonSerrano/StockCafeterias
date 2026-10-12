@@ -94,6 +94,7 @@ Las clases de `Entidades/Modelos` se generaron con `Scaffold-DbContext` y luego 
 | Formulario de Producto | Listo | Fernando |
 | Formulario de Insumo | Listo | Fernando |
 | Formulario de Usuario | Listo | Fernando |
+| Pruebas finales | Listo | Sherlon |
 
 ## Cronograma de entregables
 
