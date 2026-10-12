@@ -88,12 +88,12 @@ Las clases de `Entidades/Modelos` se generaron con `Scaffold-DbContext` y luego 
 | `ProductoRepositorio` y sus pruebas | Listo | Sherlon |
 | `InsumoRepositorio` y sus clases de `Listados` | Listo | Renato |
 | `UsuarioRepositorio` y sus clases de `Listados` | Listo | Renato |
-| Repositorios de listas auxiliares (Categoría, Unidad de medida, Rol, Local) | Pendiente | |
-| Capa de Negocio (validaciones de Producto, Insumo y Usuario) | Pendiente | |
-| Menú principal | Pendiente | |
-| Formulario de Producto | Pendiente | |
-| Formulario de Insumo | Pendiente | |
-| Formulario de Usuario | Pendiente | |
+| Repositorios de listas auxiliares (Categoría, Unidad de medida, Rol, Local) | Listo | Fernando |
+| Capa de Negocio (validaciones de Producto, Insumo y Usuario) | Listo | Fernando |
+| Menú principal | Listo | Fernando |
+| Formulario de Producto | Listo | Fernando |
+| Formulario de Insumo | Listo | Fernando |
+| Formulario de Usuario | Listo | Fernando |
 
 ## Cronograma de entregables
 
