@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using StockCafeterias.Entidades.Modelos;
 
 namespace StockCafeterias.Pruebas;
@@ -14,7 +14,7 @@ public static class DatosPrueba
     public const int IdRolAdmin = 1;
     public const int IdRolEncargado = 2;
     public const int IdLocalJockey = 1;
-
+    public const int IdCategoriaPostres = 1;
     public const int IdInexistente = int.MaxValue;
 
     // Texto único para que cada ejecución use datos propios y no choque con otros
@@ -29,6 +29,16 @@ public static class DatosPrueba
         Precio = 12.50m,
         IdUnidadMedida = IdUnidadMedidaKilogramo,
         StockMinimo = 4m
+    };
+
+    public static Producto NuevoProducto(string? token = null) => new()
+    {
+        Nombre = "Producto prueba " + (token ?? Token()),
+        IdCategoria = IdCategoriaPostres,
+        PrecioVenta = 25.00m,
+        CostoPromedio = 10.00m,
+        StockMaximo = 50,
+        Foto = null
     };
 
     public static Usuario NuevoUsuario(string? token = null)

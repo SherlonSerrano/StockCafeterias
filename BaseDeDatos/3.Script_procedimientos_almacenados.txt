@@ -9,6 +9,8 @@
 -- =========================================================
 USE StockCafeterias;
 GO
+SET QUOTED_IDENTIFIER ON;
+GO
 
 -- =========================================================
 -- PARTE A: LOS 5 PROCEDIMIENTOS PRINCIPALES

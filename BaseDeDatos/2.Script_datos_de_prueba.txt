@@ -7,6 +7,8 @@
 -- =========================================================
 USE StockCafeterias;
 GO
+SET QUOTED_IDENTIFIER ON;
+GO
 
 -- ---------------------------------------------------------
 -- 1. UNIDADMEDIDA (5 registros)
