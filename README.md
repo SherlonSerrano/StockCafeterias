@@ -154,6 +154,16 @@ La aplicación consulta las credenciales mediante `dbo.sp_ValidarLogin` y verifi
 Las contraseñas nuevas se almacenan como hashes.
 Los valores antiguos `HASH_TEMP_000` son datos de ejemplo y no permiten iniciar sesión.
 
+### Método de hash de contraseña
+
+Para proteger las contraseñas de los usuarios, se implementó PBKDF2-HMAC-SHA256, con 600 000 iteraciones, una sal aleatoria de 16 bytes y un hash de 32 bytes.
+
+Durante el registro, la clase PasswordHasher genera el hash que se almacena en SQL Server, evitando guardar la contraseña en texto plano.
+
+Durante el inicio de sesión, el sistema recupera el hash mediante sp_ValidarLogin y verifica la contraseña ingresada mediante una comparación de tiempo constante.
+
+Este método permite proteger las credenciales y dificulta los ataques de fuerza bruta.
+
 ### Registro de usuarios
 
 `FrmRegistro` permite crear cuentas activas con rol **Invitado**. Valida que los campos estén completos, que las contraseñas coincidan, que tengan entre 12 y 128 caracteres y que el nombre de usuario no esté repetido.
