@@ -147,6 +147,20 @@ Los scripts y su orden de ejecución se detallan en **Cómo ejecutar el proyecto
 
 Para la PA3 se agregó `BaseDeDatos/5.Script_PA3_ValidarLogin.sql`, que actualiza `dbo.sp_ValidarLogin` para recibir únicamente `@NombreUsuario`. El archivo `4.Script_pruebas_finales.txt` corresponde a pruebas anteriores de la PA2 y no es necesario para instalar la aplicación.
 
+### Cuentas de demostración (PA3)
+
+Para facilitar las pruebas de inicio de sesión y acceso por roles, se agregó el archivo `BaseDeDatos/6.Script_PA3_UsuariosDemo.sql`.
+
+Si ya se tiene instalada la base de datos de la PA2, ejecutar los scripts 5 y 6, en ese orden, desde SQL Server Management Studio.
+
+| Rol | Usuario | Contraseña |
+|---|---|---|
+| Administrador | admin_pa3 | AdminPA3#2026! |
+| Invitado | invitado_pa3 | InvitadoPA3#2026! |
+
+- Las contraseñas se almacenan mediante PBKDF2-SHA256.
+- El script no modifica las cuentas existentes.
+
 ### Autenticación
 
 La aplicación consulta las credenciales mediante `dbo.sp_ValidarLogin` y verifica las contraseñas en C# utilizando PBKDF2-SHA256.
