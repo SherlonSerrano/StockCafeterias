@@ -1,6 +1,7 @@
 using StockCafeterias.Datos.Repositorios;
 using StockCafeterias.Entidades.Listados;
 using StockCafeterias.Entidades.Modelos;
+using StockCafeterias.Negocio.Seguridad;
 
 namespace StockCafeterias.Negocio.Servicios;
 
@@ -45,8 +46,10 @@ public class UsuarioServicio
             if (string.IsNullOrWhiteSpace(usuario.PasswordHash))
                 throw new ArgumentException("La contraseña es obligatoria para un usuario nuevo.");
 
-            if (usuario.PasswordHash.Length < 4)
-                throw new ArgumentException("La contraseña debe tener al menos 4 caracteres.");
+            if (usuario.PasswordHash.Length < 12)
+                throw new ArgumentException("La contraseña debe tener al menos 12 caracteres.");
+
+            usuario.PasswordHash = PasswordHasher.CrearHash(usuario.PasswordHash);
 
             usuario.IdUsuario = _repo.Insertar(usuario, usuarioAuditoria.Trim());
             return usuario.IdUsuario;
@@ -64,14 +67,77 @@ public class UsuarioServicio
         if (string.IsNullOrWhiteSpace(nuevaPassword))
             throw new ArgumentException("La contraseña no puede estar vacía.");
 
-        if (nuevaPassword.Trim().Length < 4)
-            throw new ArgumentException("La contraseña debe tener al menos 4 caracteres.");
+        if (nuevaPassword.Length < 12)
+            throw new ArgumentException("La contraseña debe tener al menos 12 caracteres.");
 
         if (string.IsNullOrWhiteSpace(usuarioAuditoria))
             throw new ArgumentException("El usuario que realiza la operación es requerido.");
 
-        return _repo.CambiarPassword(idUsuario, nuevaPassword.Trim(), usuarioAuditoria.Trim());
+        return _repo.CambiarPassword(
+            idUsuario,
+            PasswordHasher.CrearHash(nuevaPassword),
+            usuarioAuditoria.Trim());
+
     }
+
+    // Registro público de cuentas desde FrmRegistro.
+    // Todas las cuentas nuevas reciben el rol Invitado.
+    public int RegistrarCuenta(
+        string nombres,
+        string apellidos,
+        string nombreUsuario,
+        string contrasena,
+        string confirmarContrasena)
+    {
+        if (string.IsNullOrWhiteSpace(nombres) ||
+            string.IsNullOrWhiteSpace(apellidos) ||
+            string.IsNullOrWhiteSpace(nombreUsuario))
+        {
+            throw new ArgumentException(
+                "Complete todos los campos obligatorios.");
+        }
+
+        if (nombres.Trim().Length > 100 ||
+            apellidos.Trim().Length > 100 ||
+            nombreUsuario.Trim().Length > 50)
+        {
+            throw new ArgumentException(
+                "Uno de los campos supera la longitud permitida.");
+        }
+
+        if (string.IsNullOrWhiteSpace(contrasena) ||
+            contrasena.Length < 12 ||
+            contrasena.Length > 128)
+        {
+            throw new ArgumentException(
+                "La contraseña debe tener entre 12 y 128 caracteres.");
+        }
+
+        if (contrasena != confirmarContrasena)
+        {
+            throw new ArgumentException(
+                "Las contraseñas no coinciden.");
+        }
+
+        var usuario = new Usuario
+        {
+            Nombres = nombres.Trim(),
+            Apellidos = apellidos.Trim(),
+            NombreUsuario = nombreUsuario.Trim(),
+
+            // Guardar() convertirá este valor en hash PBKDF2.
+            PasswordHash = contrasena,
+
+            // Rol Invitado definido en nuestra base de datos.
+            IdRol = 3,
+            IdLocal = null,
+            FechaIngreso = DateOnly.FromDateTime(DateTime.Today),
+            Estado = 1
+        };
+
+        return Guardar(usuario, "registro-publico");
+    }
+
 
     public int Eliminar(int idUsuario, string usuarioAuditoria)
     {

@@ -11,8 +11,4 @@
     <ProjectReference Include="..\StockCafeterias.Entidades\StockCafeterias.Entidades.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Servicios\" />
-  </ItemGroup>
-
 </Project>

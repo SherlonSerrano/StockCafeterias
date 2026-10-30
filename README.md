@@ -105,3 +105,87 @@ Las clases de `Entidades/Modelos` se generaron con `Scaffold-DbContext` y luego 
 | PA3 | 10 | Inicio de sesión con registro de usuario |
 | PA4 | 13 | Capa Web: 2 formularios de consulta con filtros, paginación y gráficos estadísticos |
 | Examen final | 16 | Sistema completo, base de datos e informe final |
+
+
+## PA3 - Inicio de sesión y registro
+
+### Preparación de la base de datos
+
+1. Crear y configurar la base de datos StockCafeterias utilizando los scripts de BaseDeDatos.
+
+2. Ejecutar los scripts anteriores de la PA2 en su orden original (1, 2, 3 y 4).
+
+3. Ejecutar al final:
+   BaseDeDatos/5.Script_PA3_ValidarLogin.sql
+
+   Este script actualiza el procedimiento dbo.sp_ValidarLogin para recibir únicamente @NombreUsuario.
+
+IMPORTANTE:
+- El script 4 contiene pruebas correspondientes a la versión anterior del procedimiento (PA2).
+- No ejecutar el script 4 después del script 5.
+- Si se reinstala el procedimiento antiguo, se debe ejecutar nuevamente el script 5.
+
+### Autenticación
+
+La aplicación consulta las credenciales mediante dbo.sp_ValidarLogin y verifica las contraseñas en C# utilizando PBKDF2-SHA256.
+
+Las contraseñas nuevas se almacenan como hashes.
+Los valores antiguos HASH_TEMP_000 son datos de ejemplo y no permiten iniciar sesión.
+
+### Registro de usuarios
+
+El formulario de registro crea cuentas activas con rol Invitado.
+
+Los roles administrativos deben configurarse mediante el mantenimiento autorizado de usuarios.
+
+### Pruebas
+
+Para verificar el funcionamiento del inicio de sesión y la seguridad de las contraseñas:
+
+1. Abrir Visual Studio 2026.
+2. Abrir la solución StockCafeterias.slnx.
+3. Ir a Ver → Terminal (PowerShell).
+4. Verificar que la terminal esté ubicada en la carpeta raíz del proyecto StockCafeterias.
+5. Copiar y ejecutar el siguiente comando:
+
+   dotnet test StockCafeterias.Pruebas/StockCafeterias.Pruebas.csproj --filter "FullyQualifiedName~PasswordHasherPruebas|FullyQualifiedName~AutenticacionServicioPruebas"
+
+Resultado esperado:
+- 7 pruebas correctas.
+- 0 errores.
+- 0 pruebas omitidas.
+
+Estas pruebas no requieren conectarse a SQL Server.
+
+
+### Prueba manual del rol Administrador
+
+Esta prueba debe realizarse únicamente en una base de datos local de desarrollo.
+
+1. Ejecutar la aplicación.
+2. Registrar una cuenta nueva desde el formulario de registro, con un nombre de usuario de prueba.
+3. Cerrar la aplicación.
+4. Abrir SQL Server Management Studio.
+5. Ejecutar en la base StockCafeterias:
+
+   UPDATE dbo.Usuario
+   SET IdRol = 1
+   WHERE NombreUsuario = 'USUARIO_DE_PRUEBA'
+     AND IdRol = 3
+     AND Estado = 1;
+
+   Reemplazar USUARIO_DE_PRUEBA por el nombre utilizado al registrarse.
+
+6. Iniciar sesión nuevamente con esa cuenta.
+7. Verificar que aparezca el rol Admin y que estén habilitados Productos, Insumos y Usuarios.
+8. Cerrar la aplicación y restaurar el rol original:
+
+   UPDATE dbo.Usuario
+   SET IdRol = 3
+   WHERE NombreUsuario = 'USUARIO_DE_PRUEBA'
+     AND IdRol = 1;
+
+IMPORTANTE:
+- No realizar esta prueba en una base de producción.
+- No publicar contraseñas reales en el repositorio.
+- Los permisos de Administrador deben asignarse únicamente por personal autorizado.

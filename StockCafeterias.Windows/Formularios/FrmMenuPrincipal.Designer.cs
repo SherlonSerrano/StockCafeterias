@@ -57,8 +57,9 @@ partial class FrmMenuPrincipal
         pnlHeader.Controls.Add(lblTitulo);
         pnlHeader.Dock = DockStyle.Top;
         pnlHeader.Location = new Point(0, 0);
+        pnlHeader.Margin = new Padding(4, 4, 4, 4);
         pnlHeader.Name = "pnlHeader";
-        pnlHeader.Size = new Size(1000, 80);
+        pnlHeader.Size = new Size(1250, 100);
         pnlHeader.TabIndex = 0;
         // 
         // lblSubtitulo
@@ -66,20 +67,22 @@ partial class FrmMenuPrincipal
         lblSubtitulo.AutoSize = true;
         lblSubtitulo.Font = new Font("Segoe UI", 10F);
         lblSubtitulo.ForeColor = Color.FromArgb(189, 195, 199);
-        lblSubtitulo.Location = new Point(25, 45);
+        lblSubtitulo.Location = new Point(31, 56);
+        lblSubtitulo.Margin = new Padding(4, 0, 4, 0);
         lblSubtitulo.Name = "lblSubtitulo";
-        lblSubtitulo.Size = new Size(480, 23);
+        lblSubtitulo.Size = new Size(610, 28);
         lblSubtitulo.TabIndex = 1;
-        lblSubtitulo.Text = "Sistema de Control de Inventario Multi-Local | PA2 Programación";
+        lblSubtitulo.Text = "Sistema de Control de Inventario Multi-Local | PA3 - Login y Registro";
         // 
         // lblTitulo
         // 
         lblTitulo.AutoSize = true;
         lblTitulo.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
         lblTitulo.ForeColor = Color.White;
-        lblTitulo.Location = new Point(22, 9);
+        lblTitulo.Location = new Point(28, 11);
+        lblTitulo.Margin = new Padding(4, 0, 4, 0);
         lblTitulo.Name = "lblTitulo";
-        lblTitulo.Size = new Size(307, 41);
+        lblTitulo.Size = new Size(338, 48);
         lblTitulo.TabIndex = 0;
         lblTitulo.Text = "☕ StockCafeterias";
         // 
@@ -91,9 +94,10 @@ partial class FrmMenuPrincipal
         pnlLateral.Controls.Add(btnInsumos);
         pnlLateral.Controls.Add(btnProductos);
         pnlLateral.Dock = DockStyle.Left;
-        pnlLateral.Location = new Point(0, 80);
+        pnlLateral.Location = new Point(0, 100);
+        pnlLateral.Margin = new Padding(4, 4, 4, 4);
         pnlLateral.Name = "pnlLateral";
-        pnlLateral.Size = new Size(220, 520);
+        pnlLateral.Size = new Size(275, 650);
         pnlLateral.TabIndex = 1;
         // 
         // btnSalir
@@ -105,9 +109,10 @@ partial class FrmMenuPrincipal
         btnSalir.FlatStyle = FlatStyle.Flat;
         btnSalir.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
         btnSalir.ForeColor = Color.White;
-        btnSalir.Location = new Point(0, 465);
+        btnSalir.Location = new Point(0, 581);
+        btnSalir.Margin = new Padding(4, 4, 4, 4);
         btnSalir.Name = "btnSalir";
-        btnSalir.Size = new Size(220, 55);
+        btnSalir.Size = new Size(275, 69);
         btnSalir.TabIndex = 3;
         btnSalir.Text = "🚪 Salir del Sistema";
         btnSalir.UseVisualStyleBackColor = false;
@@ -121,10 +126,11 @@ partial class FrmMenuPrincipal
         btnUsuarios.FlatStyle = FlatStyle.Flat;
         btnUsuarios.Font = new Font("Segoe UI", 11F);
         btnUsuarios.ForeColor = Color.White;
-        btnUsuarios.Location = new Point(0, 110);
+        btnUsuarios.Location = new Point(0, 138);
+        btnUsuarios.Margin = new Padding(4, 4, 4, 4);
         btnUsuarios.Name = "btnUsuarios";
-        btnUsuarios.Padding = new Padding(20, 0, 0, 0);
-        btnUsuarios.Size = new Size(220, 55);
+        btnUsuarios.Padding = new Padding(25, 0, 0, 0);
+        btnUsuarios.Size = new Size(275, 69);
         btnUsuarios.TabIndex = 2;
         btnUsuarios.Text = "👤 Usuarios";
         btnUsuarios.TextAlign = ContentAlignment.MiddleLeft;
@@ -139,10 +145,11 @@ partial class FrmMenuPrincipal
         btnInsumos.FlatStyle = FlatStyle.Flat;
         btnInsumos.Font = new Font("Segoe UI", 11F);
         btnInsumos.ForeColor = Color.White;
-        btnInsumos.Location = new Point(0, 55);
+        btnInsumos.Location = new Point(0, 69);
+        btnInsumos.Margin = new Padding(4, 4, 4, 4);
         btnInsumos.Name = "btnInsumos";
-        btnInsumos.Padding = new Padding(20, 0, 0, 0);
-        btnInsumos.Size = new Size(220, 55);
+        btnInsumos.Padding = new Padding(25, 0, 0, 0);
+        btnInsumos.Size = new Size(275, 69);
         btnInsumos.TabIndex = 1;
         btnInsumos.Text = "📦 Insumos";
         btnInsumos.TextAlign = ContentAlignment.MiddleLeft;
@@ -158,9 +165,10 @@ partial class FrmMenuPrincipal
         btnProductos.Font = new Font("Segoe UI", 11F);
         btnProductos.ForeColor = Color.White;
         btnProductos.Location = new Point(0, 0);
+        btnProductos.Margin = new Padding(4, 4, 4, 4);
         btnProductos.Name = "btnProductos";
-        btnProductos.Padding = new Padding(20, 0, 0, 0);
-        btnProductos.Size = new Size(220, 55);
+        btnProductos.Padding = new Padding(25, 0, 0, 0);
+        btnProductos.Size = new Size(275, 69);
         btnProductos.TabIndex = 0;
         btnProductos.Text = "🍰 Productos";
         btnProductos.TextAlign = ContentAlignment.MiddleLeft;
@@ -175,9 +183,10 @@ partial class FrmMenuPrincipal
         pnlContenedor.Controls.Add(pnlCardProductos);
         pnlContenedor.Controls.Add(lblBienvenida);
         pnlContenedor.Dock = DockStyle.Fill;
-        pnlContenedor.Location = new Point(220, 80);
+        pnlContenedor.Location = new Point(275, 100);
+        pnlContenedor.Margin = new Padding(4, 4, 4, 4);
         pnlContenedor.Name = "pnlContenedor";
-        pnlContenedor.Size = new Size(780, 520);
+        pnlContenedor.Size = new Size(975, 650);
         pnlContenedor.TabIndex = 2;
         // 
         // pnlCardUsuarios
@@ -187,9 +196,10 @@ partial class FrmMenuPrincipal
         pnlCardUsuarios.Controls.Add(btnCardUsuarios);
         pnlCardUsuarios.Controls.Add(lblCardUsuariosDesc);
         pnlCardUsuarios.Controls.Add(lblCardUsuariosTitulo);
-        pnlCardUsuarios.Location = new Point(515, 100);
+        pnlCardUsuarios.Location = new Point(644, 125);
+        pnlCardUsuarios.Margin = new Padding(4, 4, 4, 4);
         pnlCardUsuarios.Name = "pnlCardUsuarios";
-        pnlCardUsuarios.Size = new Size(225, 230);
+        pnlCardUsuarios.Size = new Size(281, 287);
         pnlCardUsuarios.TabIndex = 3;
         // 
         // btnCardUsuarios
@@ -200,9 +210,10 @@ partial class FrmMenuPrincipal
         btnCardUsuarios.FlatStyle = FlatStyle.Flat;
         btnCardUsuarios.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
         btnCardUsuarios.ForeColor = Color.White;
-        btnCardUsuarios.Location = new Point(20, 165);
+        btnCardUsuarios.Location = new Point(25, 206);
+        btnCardUsuarios.Margin = new Padding(4, 4, 4, 4);
         btnCardUsuarios.Name = "btnCardUsuarios";
-        btnCardUsuarios.Size = new Size(180, 42);
+        btnCardUsuarios.Size = new Size(225, 52);
         btnCardUsuarios.TabIndex = 2;
         btnCardUsuarios.Text = "Abrir Usuarios";
         btnCardUsuarios.UseVisualStyleBackColor = false;
@@ -212,9 +223,10 @@ partial class FrmMenuPrincipal
         // 
         lblCardUsuariosDesc.Font = new Font("Segoe UI", 9F);
         lblCardUsuariosDesc.ForeColor = Color.FromArgb(127, 140, 141);
-        lblCardUsuariosDesc.Location = new Point(15, 60);
+        lblCardUsuariosDesc.Location = new Point(19, 75);
+        lblCardUsuariosDesc.Margin = new Padding(4, 0, 4, 0);
         lblCardUsuariosDesc.Name = "lblCardUsuariosDesc";
-        lblCardUsuariosDesc.Size = new Size(190, 90);
+        lblCardUsuariosDesc.Size = new Size(238, 112);
         lblCardUsuariosDesc.TabIndex = 1;
         lblCardUsuariosDesc.Text = "Administración de usuarios, asignación de roles, locales asignados y credenciales de acceso.";
         // 
@@ -223,9 +235,10 @@ partial class FrmMenuPrincipal
         lblCardUsuariosTitulo.AutoSize = true;
         lblCardUsuariosTitulo.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
         lblCardUsuariosTitulo.ForeColor = Color.FromArgb(44, 62, 80);
-        lblCardUsuariosTitulo.Location = new Point(15, 18);
+        lblCardUsuariosTitulo.Location = new Point(19, 22);
+        lblCardUsuariosTitulo.Margin = new Padding(4, 0, 4, 0);
         lblCardUsuariosTitulo.Name = "lblCardUsuariosTitulo";
-        lblCardUsuariosTitulo.Size = new Size(118, 28);
+        lblCardUsuariosTitulo.Size = new Size(154, 32);
         lblCardUsuariosTitulo.TabIndex = 0;
         lblCardUsuariosTitulo.Text = "👤 Usuarios";
         // 
@@ -236,9 +249,10 @@ partial class FrmMenuPrincipal
         pnlCardInsumos.Controls.Add(btnCardInsumos);
         pnlCardInsumos.Controls.Add(lblCardInsumosDesc);
         pnlCardInsumos.Controls.Add(lblCardInsumosTitulo);
-        pnlCardInsumos.Location = new Point(275, 100);
+        pnlCardInsumos.Location = new Point(344, 125);
+        pnlCardInsumos.Margin = new Padding(4, 4, 4, 4);
         pnlCardInsumos.Name = "pnlCardInsumos";
-        pnlCardInsumos.Size = new Size(225, 230);
+        pnlCardInsumos.Size = new Size(281, 287);
         pnlCardInsumos.TabIndex = 2;
         // 
         // btnCardInsumos
@@ -249,9 +263,10 @@ partial class FrmMenuPrincipal
         btnCardInsumos.FlatStyle = FlatStyle.Flat;
         btnCardInsumos.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
         btnCardInsumos.ForeColor = Color.White;
-        btnCardInsumos.Location = new Point(20, 165);
+        btnCardInsumos.Location = new Point(25, 206);
+        btnCardInsumos.Margin = new Padding(4, 4, 4, 4);
         btnCardInsumos.Name = "btnCardInsumos";
-        btnCardInsumos.Size = new Size(180, 42);
+        btnCardInsumos.Size = new Size(225, 52);
         btnCardInsumos.TabIndex = 2;
         btnCardInsumos.Text = "Abrir Insumos";
         btnCardInsumos.UseVisualStyleBackColor = false;
@@ -261,9 +276,10 @@ partial class FrmMenuPrincipal
         // 
         lblCardInsumosDesc.Font = new Font("Segoe UI", 9F);
         lblCardInsumosDesc.ForeColor = Color.FromArgb(127, 140, 141);
-        lblCardInsumosDesc.Location = new Point(15, 60);
+        lblCardInsumosDesc.Location = new Point(19, 75);
+        lblCardInsumosDesc.Margin = new Padding(4, 0, 4, 0);
         lblCardInsumosDesc.Name = "lblCardInsumosDesc";
-        lblCardInsumosDesc.Size = new Size(190, 90);
+        lblCardInsumosDesc.Size = new Size(238, 112);
         lblCardInsumosDesc.TabIndex = 1;
         lblCardInsumosDesc.Text = "Control de insumos básicos, unidades de medida, costos y umbrales de stock mínimo de seguridad.";
         // 
@@ -272,9 +288,10 @@ partial class FrmMenuPrincipal
         lblCardInsumosTitulo.AutoSize = true;
         lblCardInsumosTitulo.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
         lblCardInsumosTitulo.ForeColor = Color.FromArgb(44, 62, 80);
-        lblCardInsumosTitulo.Location = new Point(15, 18);
+        lblCardInsumosTitulo.Location = new Point(19, 22);
+        lblCardInsumosTitulo.Margin = new Padding(4, 0, 4, 0);
         lblCardInsumosTitulo.Name = "lblCardInsumosTitulo";
-        lblCardInsumosTitulo.Size = new Size(116, 28);
+        lblCardInsumosTitulo.Size = new Size(152, 32);
         lblCardInsumosTitulo.TabIndex = 0;
         lblCardInsumosTitulo.Text = "📦 Insumos";
         // 
@@ -285,9 +302,10 @@ partial class FrmMenuPrincipal
         pnlCardProductos.Controls.Add(btnCardProductos);
         pnlCardProductos.Controls.Add(lblCardProductosDesc);
         pnlCardProductos.Controls.Add(lblCardProductosTitulo);
-        pnlCardProductos.Location = new Point(35, 100);
+        pnlCardProductos.Location = new Point(44, 125);
+        pnlCardProductos.Margin = new Padding(4, 4, 4, 4);
         pnlCardProductos.Name = "pnlCardProductos";
-        pnlCardProductos.Size = new Size(225, 230);
+        pnlCardProductos.Size = new Size(281, 287);
         pnlCardProductos.TabIndex = 1;
         // 
         // btnCardProductos
@@ -298,9 +316,10 @@ partial class FrmMenuPrincipal
         btnCardProductos.FlatStyle = FlatStyle.Flat;
         btnCardProductos.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
         btnCardProductos.ForeColor = Color.White;
-        btnCardProductos.Location = new Point(20, 165);
+        btnCardProductos.Location = new Point(25, 206);
+        btnCardProductos.Margin = new Padding(4, 4, 4, 4);
         btnCardProductos.Name = "btnCardProductos";
-        btnCardProductos.Size = new Size(180, 42);
+        btnCardProductos.Size = new Size(225, 52);
         btnCardProductos.TabIndex = 2;
         btnCardProductos.Text = "Abrir Productos";
         btnCardProductos.UseVisualStyleBackColor = false;
@@ -310,9 +329,10 @@ partial class FrmMenuPrincipal
         // 
         lblCardProductosDesc.Font = new Font("Segoe UI", 9F);
         lblCardProductosDesc.ForeColor = Color.FromArgb(127, 140, 141);
-        lblCardProductosDesc.Location = new Point(15, 60);
+        lblCardProductosDesc.Location = new Point(19, 75);
+        lblCardProductosDesc.Margin = new Padding(4, 0, 4, 0);
         lblCardProductosDesc.Name = "lblCardProductosDesc";
-        lblCardProductosDesc.Size = new Size(190, 90);
+        lblCardProductosDesc.Size = new Size(238, 112);
         lblCardProductosDesc.TabIndex = 1;
         lblCardProductosDesc.Text = "Catálogo de productos finales, precios de venta, costos, stock máximo y registro fotográfico.";
         // 
@@ -321,9 +341,10 @@ partial class FrmMenuPrincipal
         lblCardProductosTitulo.AutoSize = true;
         lblCardProductosTitulo.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
         lblCardProductosTitulo.ForeColor = Color.FromArgb(44, 62, 80);
-        lblCardProductosTitulo.Location = new Point(15, 18);
+        lblCardProductosTitulo.Location = new Point(19, 22);
+        lblCardProductosTitulo.Margin = new Padding(4, 0, 4, 0);
         lblCardProductosTitulo.Name = "lblCardProductosTitulo";
-        lblCardProductosTitulo.Size = new Size(132, 28);
+        lblCardProductosTitulo.Size = new Size(172, 32);
         lblCardProductosTitulo.TabIndex = 0;
         lblCardProductosTitulo.Text = "🍰 Productos";
         // 
@@ -332,9 +353,10 @@ partial class FrmMenuPrincipal
         lblBienvenida.AutoSize = true;
         lblBienvenida.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
         lblBienvenida.ForeColor = Color.FromArgb(44, 62, 80);
-        lblBienvenida.Location = new Point(35, 35);
+        lblBienvenida.Location = new Point(44, 44);
+        lblBienvenida.Margin = new Padding(4, 0, 4, 0);
         lblBienvenida.Name = "lblBienvenida";
-        lblBienvenida.Size = new Size(424, 32);
+        lblBienvenida.Size = new Size(468, 38);
         lblBienvenida.TabIndex = 0;
         lblBienvenida.Text = "Panel de Mantenimientos (CRUDs)";
         // 
@@ -342,41 +364,43 @@ partial class FrmMenuPrincipal
         // 
         statusStrip1.ImageScalingSize = new Size(20, 20);
         statusStrip1.Items.AddRange(new ToolStripItem[] { lblStatusUsuario, lblStatusSeparador, lblStatusFecha });
-        statusStrip1.Location = new Point(220, 574);
+        statusStrip1.Location = new Point(275, 718);
         statusStrip1.Name = "statusStrip1";
-        statusStrip1.Size = new Size(780, 26);
+        statusStrip1.Padding = new Padding(1, 0, 18, 0);
+        statusStrip1.Size = new Size(975, 32);
         statusStrip1.TabIndex = 3;
         statusStrip1.Text = "statusStrip1";
         // 
         // lblStatusUsuario
         // 
         lblStatusUsuario.Name = "lblStatusUsuario";
-        lblStatusUsuario.Size = new Size(111, 20);
+        lblStatusUsuario.Size = new Size(131, 25);
         lblStatusUsuario.Text = "Usuario: admin";
         // 
         // lblStatusSeparador
         // 
         lblStatusSeparador.Name = "lblStatusSeparador";
-        lblStatusSeparador.Size = new Size(13, 20);
+        lblStatusSeparador.Size = new Size(16, 25);
         lblStatusSeparador.Text = "|";
         // 
         // lblStatusFecha
         // 
         lblStatusFecha.Name = "lblStatusFecha";
-        lblStatusFecha.Size = new Size(144, 20);
+        lblStatusFecha.Size = new Size(160, 25);
         lblStatusFecha.Text = "Fecha: 2026-10-11";
         // 
         // FrmMenuPrincipal
         // 
-        AutoScaleDimensions = new SizeF(8F, 20F);
+        AutoScaleDimensions = new SizeF(10F, 25F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.White;
-        ClientSize = new Size(1000, 600);
+        ClientSize = new Size(1250, 750);
         Controls.Add(statusStrip1);
         Controls.Add(pnlContenedor);
         Controls.Add(pnlLateral);
         Controls.Add(pnlHeader);
-        MinimumSize = new Size(950, 550);
+        Margin = new Padding(4, 4, 4, 4);
+        MinimumSize = new Size(1182, 674);
         Name = "FrmMenuPrincipal";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "StockCafeterias - Menú Principal";
