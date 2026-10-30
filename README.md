@@ -18,43 +18,71 @@ Sistema de control de inventario multi-local para cafeterías, desarrollado como
 | `StockCafeterias.Datos` | `DbContext`, clase `Conexion` y un repositorio por tabla que ejecuta los procedimientos almacenados | Entidades |
 | `StockCafeterias.Negocio` | Validaciones y reglas de negocio | Datos, Entidades |
 | `StockCafeterias.Windows` | Menú principal y formularios | Negocio, Entidades |
-| `StockCafeterias.Pruebas` | Pruebas automáticas de los repositorios | Datos, Entidades |
+| `StockCafeterias.Pruebas` | Pruebas automáticas de los repositorios y la autenticación | Datos, Negocio, Entidades |
 
 **Regla principal:** `Windows` nunca referencia a `Datos`. Los formularios solo hablan con `Negocio`, y `Negocio` con `Datos`.
 
 ## Cómo ejecutar el proyecto en tu computadora
 
-1. **Clona el repositorio** desde Visual Studio con Git, Clonar repositorio (o con `git clone`).
-2. **Crea la base de datos.** Abre SQL Server Management Studio y ejecuta, en este orden y cada uno completo, los scripts de la carpeta `BaseDeDatos`:
-   1. `01_crear_bd_v2.sql`
-   2. `02_datos_prueba_v2.sql`
-   3. `03_procedimientos_v2.sql`
+1. **Clona el repositorio** desde Visual Studio con Git, Clonar repositorio (o con `git clone`). Para trabajar con la PA3 mientras se revisa el Pull Request #3, utiliza la rama `feature/pa3-login-registro`.
+2. **Revisa la ruta de los archivos en el script 1.** Las líneas `FILENAME = '...'` apuntan a la carpeta `DATA` de SQL Server (`C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA`). Si tu instalación usa otra ruta, cámbiala solo en tu copia local antes de ejecutarlo.
+3. **Crea la base de datos.** Abre SQL Server Management Studio y ejecuta, en este orden, los scripts de la carpeta `BaseDeDatos`:
+   1. `1.Script_BD_tablas_vistas.txt`
+   2. `2.Script_datos_de_prueba.txt`
+   3. `3.Script_procedimientos_almacenados.txt`
+   4. `5.Script_PA3_ValidarLogin.sql`
+
+   **Atención:** el script 1 elimina y recrea la base `StockCafeterias` si ya existe. Ejecútalo solo para preparar una base nueva o descartable. Si ya tienes la base de la PA2 configurada, ejecuta únicamente el script 5 para actualizar el procedimiento de login. El script 4 es de pruebas de la PA2 y no forma parte de la instalación.
 
    Al final, `sys.tables` debe mostrar 13 tablas y `sys.procedures` 25 procedimientos.
-3. **Revisa la ruta de los archivos en el script 01.** Las líneas `FILENAME = '...'` apuntan a la carpeta `DATA` de SQL Server (`C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA`). Si tu instalación usa otra ruta, cámbiala solo en tu copia local antes de ejecutarlo.
 4. **Ajusta la cadena de conexión.** En `StockCafeterias.Datos/Conexion.cs`, cambia `Server=localhost` por el nombre que usas al conectarte en SSMS (por ejemplo `.\SQLEXPRESS`). **No subas ese cambio al repositorio** si es distinto al de los demás.
 5. **Compila** con Ctrl+Shift+B. Debe terminar con 0 errores.
-6. **Ejecuta las pruebas** desde Prueba, Explorador de pruebas. Si salen en verde, tu entorno está bien configurado.
+6. **Ejecuta la aplicación** desde el proyecto `StockCafeterias.Windows` (Ctrl+F5).
+7. **Ejecuta las pruebas** desde Prueba, Explorador de pruebas. Las pruebas de repositorios requieren SQL Server configurado; las siete pruebas de seguridad y autenticación se explican en la sección PA3.
 
 > Los archivos `.mdf` y `.ldf` no se suben a Git. Si necesitas la base ya armada, pídele los archivos al jefe de grupo.
 
 ## Estructura de carpetas
 
-```
+Se muestran los principales archivos y carpetas; los formularios también cuentan con sus archivos `.Designer.cs` y, cuando corresponde, `.resx`.
+
+```text
 StockCafeterias/
-├── BaseDeDatos/                  scripts SQL (01 a 04)
+├── BaseDeDatos/                        scripts SQL de la PA1, PA2 y PA3
+│   ├── 1.Script_BD_tablas_vistas.txt
+│   ├── 2.Script_datos_de_prueba.txt
+│   ├── 3.Script_procedimientos_almacenados.txt
+│   ├── 4.Script_pruebas_finales.txt
+│   └── 5.Script_PA3_ValidarLogin.sql
 ├── StockCafeterias.Entidades/
-│   ├── Modelos/                  clases generadas desde las tablas
-│   └── Listados/                 clases de resultado de los procedimientos
+│   ├── Modelos/                        clases generadas desde las tablas
+│   └── Listados/                       resultados de los procedimientos
+│       └── UsuarioCredenciales.cs      PA3
 ├── StockCafeterias.Datos/
-│   ├── Contexto/                 StockCafeteriasContext
-│   ├── Repositorios/             un repositorio por tabla
+│   ├── Contexto/                       StockCafeteriasContext
+│   ├── Repositorios/                   repositorios de acceso a datos
+│   │   └── UsuarioRepositorio.cs
 │   └── Conexion.cs
 ├── StockCafeterias.Negocio/
-│   └── Servicios/
+│   ├── Servicios/
+│   │   ├── UsuarioServicio.cs
+│   │   └── AutenticacionServicio.cs     PA3
+│   └── Seguridad/
+│       └── PasswordHasher.cs           PA3
 ├── StockCafeterias.Windows/
-│   └── Formularios/
-└── StockCafeterias.Pruebas/
+│   ├── Formularios/
+│   │   ├── FrmMenuPrincipal.cs
+│   │   ├── FrmLogin.cs                 PA3
+│   │   ├── FrmRegistro.cs              PA3
+│   │   └── ...                          formularios de Producto, Insumo y Usuario
+│   ├── Utilidades/
+│   └── Program.cs
+├── StockCafeterias.Pruebas/
+│   ├── PasswordHasherPruebas.cs         PA3
+│   ├── AutenticacionServicioPruebas.cs  PA3
+│   └── ...                              pruebas de repositorios
+├── StockCafeterias.slnx
+└── README.md
 ```
 
 ## Flujo de trabajo en Git
@@ -95,6 +123,10 @@ Las clases de `Entidades/Modelos` se generaron con `Scaffold-DbContext` y luego 
 | Formulario de Insumo | Listo | Fernando |
 | Formulario de Usuario | Listo | Fernando |
 | Pruebas finales | Listo | Sherlon |
+| Formulario de inicio de sesión y registro de usuarios (PA3) | Listo (PR #3 en revisión) | Renato |
+| Validación de contraseñas con PBKDF2 y `sp_ValidarLogin` (PA3) | Listo (PR #3 en revisión) | Renato |
+| Control de acceso por roles (PA3) | Listo (PR #3 en revisión) | Renato |
+| Pruebas de autenticación y seguridad (7 automatizadas) (PA3) | Listo (PR #3 en revisión) | Renato |
 
 ## Cronograma de entregables
 
@@ -111,56 +143,57 @@ Las clases de `Entidades/Modelos` se generaron con `Scaffold-DbContext` y luego 
 
 ### Preparación de la base de datos
 
-1. Crear y configurar la base de datos StockCafeterias utilizando los scripts de BaseDeDatos.
+Los scripts y su orden de ejecución se detallan en **Cómo ejecutar el proyecto en tu computadora**.
 
-2. Ejecutar los scripts anteriores de la PA2 en su orden original (1, 2, 3 y 4).
-
-3. Ejecutar al final:
-   BaseDeDatos/5.Script_PA3_ValidarLogin.sql
-
-   Este script actualiza el procedimiento dbo.sp_ValidarLogin para recibir únicamente @NombreUsuario.
-
-IMPORTANTE:
-- El script 4 contiene pruebas correspondientes a la versión anterior del procedimiento (PA2).
-- No ejecutar el script 4 después del script 5.
-- Si se reinstala el procedimiento antiguo, se debe ejecutar nuevamente el script 5.
+Para la PA3 se agregó `BaseDeDatos/5.Script_PA3_ValidarLogin.sql`, que actualiza `dbo.sp_ValidarLogin` para recibir únicamente `@NombreUsuario`. El archivo `4.Script_pruebas_finales.txt` corresponde a pruebas anteriores de la PA2 y no es necesario para instalar la aplicación.
 
 ### Autenticación
 
-La aplicación consulta las credenciales mediante dbo.sp_ValidarLogin y verifica las contraseñas en C# utilizando PBKDF2-SHA256.
+La aplicación consulta las credenciales mediante `dbo.sp_ValidarLogin` y verifica las contraseñas en C# utilizando PBKDF2-SHA256.
 
 Las contraseñas nuevas se almacenan como hashes.
-Los valores antiguos HASH_TEMP_000 son datos de ejemplo y no permiten iniciar sesión.
+Los valores antiguos `HASH_TEMP_000` son datos de ejemplo y no permiten iniciar sesión.
 
 ### Registro de usuarios
 
-El formulario de registro crea cuentas activas con rol Invitado.
+`FrmRegistro` permite crear cuentas activas con rol **Invitado**. Valida que los campos estén completos, que las contraseñas coincidan, que tengan entre 12 y 128 caracteres y que el nombre de usuario no esté repetido.
 
-Los roles administrativos deben configurarse mediante el mantenimiento autorizado de usuarios.
+### Control de acceso por roles
+
+El menú principal muestra el usuario autenticado y habilita los módulos según su rol:
+
+| Rol | Productos | Insumos | Usuarios |
+|---|---|---|---|
+| Admin | Permitido | Permitido | Permitido |
+| Encargado de Local | Permitido | Permitido | Restringido |
+| Invitado | Restringido | Restringido | Restringido |
+
+Para comprobar el rol Admin con una cuenta registrada, se puede seguir la prueba manual opcional indicada al final de esta sección.
 
 ### Pruebas
 
 Para verificar el funcionamiento del inicio de sesión y la seguridad de las contraseñas:
 
 1. Abrir Visual Studio 2026.
-2. Abrir la solución StockCafeterias.slnx.
+2. Abrir la solución `StockCafeterias.slnx`.
 3. Ir a Ver → Terminal (PowerShell).
 4. Verificar que la terminal esté ubicada en la carpeta raíz del proyecto StockCafeterias.
 5. Copiar y ejecutar el siguiente comando:
 
+   ```powershell
    dotnet test StockCafeterias.Pruebas/StockCafeterias.Pruebas.csproj --filter "FullyQualifiedName~PasswordHasherPruebas|FullyQualifiedName~AutenticacionServicioPruebas"
+   ```
 
 Resultado esperado:
 - 7 pruebas correctas.
 - 0 errores.
 - 0 pruebas omitidas.
 
-Estas pruebas no requieren conectarse a SQL Server.
-
+Estas siete pruebas no requieren conectarse a SQL Server; otras pruebas del proyecto sí pueden necesitar una base configurada.
 
 ### Prueba manual del rol Administrador
 
-Esta prueba debe realizarse únicamente en una base de datos local de desarrollo.
+Esta prueba es opcional y se realiza en la base de datos local de desarrollo.
 
 1. Ejecutar la aplicación.
 2. Registrar una cuenta nueva desde el formulario de registro, con un nombre de usuario de prueba.
@@ -168,24 +201,34 @@ Esta prueba debe realizarse únicamente en una base de datos local de desarrollo
 4. Abrir SQL Server Management Studio.
 5. Ejecutar en la base StockCafeterias:
 
+   ```sql
+   USE StockCafeterias;
+   GO
+
    UPDATE dbo.Usuario
    SET IdRol = 1
    WHERE NombreUsuario = 'USUARIO_DE_PRUEBA'
      AND IdRol = 3
      AND Estado = 1;
+   ```
 
-   Reemplazar USUARIO_DE_PRUEBA por el nombre utilizado al registrarse.
+   Reemplazar `USUARIO_DE_PRUEBA` por el nombre utilizado al registrarse. Verificar que se haya actualizado exactamente una fila.
 
 6. Iniciar sesión nuevamente con esa cuenta.
 7. Verificar que aparezca el rol Admin y que estén habilitados Productos, Insumos y Usuarios.
 8. Cerrar la aplicación y restaurar el rol original:
 
+   ```sql
+   USE StockCafeterias;
+   GO
+
    UPDATE dbo.Usuario
    SET IdRol = 3
    WHERE NombreUsuario = 'USUARIO_DE_PRUEBA'
-     AND IdRol = 1;
+     AND IdRol = 1
+     AND Estado = 1;
+   ```
 
-IMPORTANTE:
-- No realizar esta prueba en una base de producción.
-- No publicar contraseñas reales en el repositorio.
-- Los permisos de Administrador deben asignarse únicamente por personal autorizado.
+   Verificar que se haya restaurado exactamente una fila.
+
+**Nota:** usar una cuenta de prueba y devolverla al rol Invitado al finalizar.
