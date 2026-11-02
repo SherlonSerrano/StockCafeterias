@@ -1,5 +1,6 @@
 using StockCafeterias.Entidades.Listados;
 using StockCafeterias.Negocio.Servicios;
+using StockCafeterias.Windows.Utilidades;
 
 namespace StockCafeterias.Windows.Formularios;
 
@@ -192,7 +193,9 @@ public partial class FrmProducto : Form
         {
             try
             {
-                _productoServicio.Eliminar(seleccionado.IdProducto, "admin");
+                _productoServicio.Eliminar(
+                seleccionado.IdProducto,
+                SesionActual.NombreUsuario);
                 MessageBox.Show("Producto desactivado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarListado();
             }

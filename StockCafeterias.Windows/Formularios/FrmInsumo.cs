@@ -1,5 +1,6 @@
 using StockCafeterias.Entidades.Listados;
 using StockCafeterias.Negocio.Servicios;
+using StockCafeterias.Windows.Utilidades;
 
 namespace StockCafeterias.Windows.Formularios;
 
@@ -193,7 +194,9 @@ public partial class FrmInsumo : Form
         {
             try
             {
-                _insumoServicio.Eliminar(seleccionado.IdInsumo, "admin");
+                _insumoServicio.Eliminar(
+                seleccionado.IdInsumo,
+                SesionActual.NombreUsuario);
                 MessageBox.Show("Insumo desactivado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarListado();
             }

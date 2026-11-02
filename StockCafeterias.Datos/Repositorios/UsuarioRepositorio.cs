@@ -35,6 +35,19 @@ public class UsuarioRepositorio
             .FirstOrDefault();
     }
 
+    // Obtiene las credenciales de un usuario activo
+    public UsuarioCredenciales? ObtenerCredenciales(string nombreUsuario)
+    {
+        using var db = Conexion.CrearContexto();
+
+        return db.Database
+            .SqlQueryRaw<UsuarioCredenciales>(
+                "EXEC dbo.sp_ValidarLogin @NombreUsuario",
+                new SqlParameter("@NombreUsuario", nombreUsuario))
+            .AsEnumerable()
+            .FirstOrDefault();
+    }
+
     // Registra un usuario nuevo y devuelve su ID
     public int Insertar(Usuario u, string usuario)
     {
