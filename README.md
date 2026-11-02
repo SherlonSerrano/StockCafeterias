@@ -32,7 +32,7 @@ Sistema de control de inventario multi-local para cafeterías, desarrollado como
    3. `3.Script_procedimientos_almacenados.txt`
    4. `5.Script_PA3_ValidarLogin.sql`
 
-   **Atención:** el script 1 elimina y recrea la base `StockCafeterias` si ya existe. Ejecútalo solo para preparar una base nueva o descartable. Si ya tienes la base de la PA2 configurada, ejecuta únicamente el script 5 para actualizar el procedimiento de login. El script 4 es de pruebas de la PA2 y no forma parte de la instalación.
+   **Atención:** el script 1 elimina y recrea la base `StockCafeterias` si ya existe. Ejecútalo solo para preparar una base nueva o descartable. Si ya tienes la base de la PA2 configurada, ejecuta únicamente los scripts 5 y 6, en ese orden, para actualizar el procedimiento de login y crear los usuarios de demostración. El script 4 es de pruebas de la PA2 y no forma parte de la instalación.
 
    Al final, `sys.tables` debe mostrar 13 tablas y `sys.procedures` 25 procedimientos.
 4. **Ajusta la cadena de conexión.** En `StockCafeterias.Datos/Conexion.cs`, cambia `Server=localhost` por el nombre que usas al conectarte en SSMS (por ejemplo `.\SQLEXPRESS`). **No subas ese cambio al repositorio** si es distinto al de los demás.
@@ -53,7 +53,7 @@ StockCafeterias/
 │   ├── 2.Script_datos_de_prueba.txt
 │   ├── 3.Script_procedimientos_almacenados.txt
 │   ├── 4.Script_pruebas_finales.txt
-│   └── 5.Script_PA3_ValidarLogin.sql
+│   ├── 5.Script_PA3_ValidarLogin.sql
 ├── StockCafeterias.Entidades/
 │   ├── Modelos/                        clases generadas desde las tablas
 │   └── Listados/                       resultados de los procedimientos
