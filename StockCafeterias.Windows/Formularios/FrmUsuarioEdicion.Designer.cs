@@ -130,7 +130,7 @@ partial class FrmUsuarioEdicion
         // 
         txtPassword.Font = new Font("Segoe UI", 10F);
         txtPassword.Location = new Point(286, 160);
-        txtPassword.MaxLength = 50;
+        txtPassword.MaxLength = 128;
         txtPassword.Name = "txtPassword";
         txtPassword.Size = new Size(240, 30);
         txtPassword.TabIndex = 8;

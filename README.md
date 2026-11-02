@@ -59,16 +59,19 @@ StockCafeterias/
 ├── StockCafeterias.Entidades/
 │   ├── Modelos/                        clases generadas desde las tablas
 │   └── Listados/                       resultados de los procedimientos
-│       └── UsuarioCredenciales.cs      PA3
+│       ├── UsuarioCredenciales.cs      PA3
+│       └── StockPorLocalListado.cs     PA3
 ├── StockCafeterias.Datos/
 │   ├── Contexto/                       StockCafeteriasContext
 │   ├── Repositorios/                   repositorios de acceso a datos
-│   │   └── UsuarioRepositorio.cs
+│   │   ├── UsuarioRepositorio.cs
+│   │   └── StockPorLocalRepositorio.cs PA3
 │   └── Conexion.cs
 ├── StockCafeterias.Negocio/
 │   ├── Servicios/
 │   │   ├── UsuarioServicio.cs
-│   │   └── AutenticacionServicio.cs     PA3
+│   │   ├── AutenticacionServicio.cs     PA3
+│   │   └── StockPorLocalServicio.cs     PA3
 │   └── Seguridad/
 │       └── PasswordHasher.cs           PA3
 ├── StockCafeterias.Windows/
@@ -76,8 +79,10 @@ StockCafeterias/
 │   │   ├── FrmMenuPrincipal.cs
 │   │   ├── FrmLogin.cs                 PA3
 │   │   ├── FrmRegistro.cs              PA3
+│   │   ├── FrmConsultaStockLocal.cs    PA3
 │   │   └── ...                          formularios de Producto, Insumo y Usuario
 │   ├── Utilidades/
+│   │   └── SesionActual.cs             PA3
 │   └── Program.cs
 ├── StockCafeterias.Pruebas/
 │   ├── PasswordHasherPruebas.cs         PA3
@@ -129,6 +134,8 @@ Las clases de `Entidades/Modelos` se generaron con `Scaffold-DbContext` y luego 
 | Validación de contraseñas con PBKDF2 y `sp_ValidarLogin` (PA3) | Listo (PR #3 en revisión) | Renato |
 | Control de acceso por roles (PA3) | Listo (PR #3 en revisión) | Renato |
 | Pruebas de autenticación y seguridad (7 automatizadas) (PA3) | Listo (PR #3 en revisión) | Renato |
+| Registro del usuario autenticado en los CRUD (`SesionActual`) (PA3) | Listo (PR #3 en revisión) | Fernando / Renato |
+| Formulario de consulta de valor de negocio (`FrmConsultaStockLocal`) (PA3) | Listo (PR #3 en revisión) | Fernando / Renato |
 
 ## Cronograma de entregables
 
@@ -136,7 +143,7 @@ Las clases de `Entidades/Modelos` se generaron con `Scaffold-DbContext` y luego 
 |---|---|---|
 | PA1 | 4 | Base de datos en SQL Server (nota 17, observaciones corregidas) |
 | PA2 | 7 | Solución N-Capas en Windows: menú principal y CRUD de Producto, Insumo y Usuario |
-| PA3 | 10 | Inicio de sesión con registro de usuario |
+| PA3 | 10 | Inicio de sesión con registro de usuario, auditoría de usuario en los CRUD y consulta de valor de negocio |
 | PA4 | 13 | Capa Web: 2 formularios de consulta con filtros, paginación y gráficos estadísticos |
 | Examen final | 16 | Sistema completo, base de datos e informe final |
 
@@ -188,11 +195,11 @@ Este método permite proteger las credenciales y dificulta los ataques de fuerza
 
 El menú principal muestra el usuario autenticado y habilita los módulos según su rol:
 
-| Rol | Productos | Insumos | Usuarios |
-|---|---|---|---|
-| Admin | Permitido | Permitido | Permitido |
-| Encargado de Local | Permitido | Permitido | Restringido |
-| Invitado | Restringido | Restringido | Restringido |
+| Rol | Productos | Insumos | Usuarios | Consulta de Stock |
+|---|---|---|---|---|
+| Admin | Permitido | Permitido | Permitido | Permitido |
+| Encargado de Local | Permitido | Permitido | Restringido | Permitido |
+| Invitado | Restringido | Restringido | Restringido | Restringido |
 
 Para comprobar el rol Admin con una cuenta registrada, se puede seguir la prueba manual opcional indicada al final de esta sección.
 

@@ -30,9 +30,9 @@ public partial class FrmUsuarioCambiarClave : Form
                 return;
             }
 
-            if (clave.Length < 4)
+            if (clave.Length < 12)
             {
-                MessageBox.Show("La contraseña debe tener al menos 4 caracteres.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("La contraseña debe tener al menos 12 caracteres.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -50,6 +50,10 @@ public partial class FrmUsuarioCambiarClave : Form
             MessageBox.Show("Contraseña actualizada exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
             Close();
+        }
+        catch (ArgumentException ex)
+        {
+            MessageBox.Show(ex.Message, "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
         catch (Exception ex)
         {

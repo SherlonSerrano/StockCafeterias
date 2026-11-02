@@ -61,7 +61,7 @@ partial class FrmUsuarioCambiarClave
         // 
         txtNuevaClave.Font = new Font("Segoe UI", 10F);
         txtNuevaClave.Location = new Point(22, 120);
-        txtNuevaClave.MaxLength = 50;
+        txtNuevaClave.MaxLength = 128;
         txtNuevaClave.Name = "txtNuevaClave";
         txtNuevaClave.Size = new Size(320, 30);
         txtNuevaClave.TabIndex = 3;
@@ -81,7 +81,7 @@ partial class FrmUsuarioCambiarClave
         // 
         txtConfirmarClave.Font = new Font("Segoe UI", 10F);
         txtConfirmarClave.Location = new Point(22, 190);
-        txtConfirmarClave.MaxLength = 50;
+        txtConfirmarClave.MaxLength = 128;
         txtConfirmarClave.Name = "txtConfirmarClave";
         txtConfirmarClave.Size = new Size(320, 30);
         txtConfirmarClave.TabIndex = 5;
