@@ -31,6 +31,7 @@ Sistema de control de inventario multi-local para cafeterías, desarrollado como
    2. `2.Script_datos_de_prueba.txt`
    3. `3.Script_procedimientos_almacenados.txt`
    4. `5.Script_PA3_ValidarLogin.sql`
+   5. `6.Script_PA3_UsuariosDemo.sql`
 
    **Atención:** el script 1 elimina y recrea la base `StockCafeterias` si ya existe. Ejecútalo solo para preparar una base nueva o descartable. Si ya tienes la base de la PA2 configurada, ejecuta únicamente los scripts 5 y 6, en ese orden, para actualizar el procedimiento de login y crear los usuarios de demostración. El script 4 es de pruebas de la PA2 y no forma parte de la instalación.
 
@@ -54,6 +55,7 @@ StockCafeterias/
 │   ├── 3.Script_procedimientos_almacenados.txt
 │   ├── 4.Script_pruebas_finales.txt
 │   ├── 5.Script_PA3_ValidarLogin.sql
+│   └── 6.Script_PA3_UsuariosDemo.sql
 ├── StockCafeterias.Entidades/
 │   ├── Modelos/                        clases generadas desde las tablas
 │   └── Listados/                       resultados de los procedimientos
