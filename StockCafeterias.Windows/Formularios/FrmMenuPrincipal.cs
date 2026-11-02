@@ -31,6 +31,13 @@ public partial class FrmMenuPrincipal : Form
         btnInsumos.Enabled = puedeMantenerStock;
         btnUsuarios.Enabled = esAdministrador;
 
+        // Permiso para consultar el inventario.
+        btnConsultaStock.Enabled = puedeMantenerStock;
+        btnConsultaStock.ForeColor = puedeMantenerStock
+            ? Color.White
+            : Color.LightGray;
+
+
         // Deshabilitar también los botones de las tarjetas.
         btnCardProductos.Enabled = puedeMantenerStock;
         btnCardInsumos.Enabled = puedeMantenerStock;
@@ -96,5 +103,14 @@ public partial class FrmMenuPrincipal : Form
         {
             Application.Exit();
         }
+    }
+
+    private void btnConsultaStock_Click(object sender, EventArgs e)
+    {
+        if (_usuario.IdRol is not (1 or 2))
+            return;
+
+        using var frm = new FrmConsultaStockLocal();
+        frm.ShowDialog(this);
     }
 }

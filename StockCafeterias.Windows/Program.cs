@@ -1,5 +1,6 @@
 
 using StockCafeterias.Windows.Formularios;
+using StockCafeterias.Windows.Utilidades;
 
 namespace StockCafeterias.Windows
 {
@@ -22,7 +23,12 @@ namespace StockCafeterias.Windows
             }
 
             // Abrir el menú después de autenticar.
+            SesionActual.Iniciar(login.UsuarioActual);
+
             Application.Run(new FrmMenuPrincipal(login.UsuarioActual));
+
+            SesionActual.Cerrar();
         }
     }
 }
+

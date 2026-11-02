@@ -1,5 +1,6 @@
 using StockCafeterias.Entidades.Modelos;
 using StockCafeterias.Negocio.Servicios;
+using StockCafeterias.Windows.Utilidades;
 
 namespace StockCafeterias.Windows.Formularios;
 
@@ -85,7 +86,9 @@ public partial class FrmInsumoEdicion : Form
                 Estado = (byte)(chkActivo.Checked ? 1 : 0)
             };
 
-            _insumoServicio.Guardar(insumo, "admin");
+            _insumoServicio.Guardar(
+            insumo,
+            SesionActual.NombreUsuario);
 
             MessageBox.Show("Insumo guardado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;

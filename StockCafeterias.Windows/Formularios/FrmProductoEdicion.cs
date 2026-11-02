@@ -126,7 +126,9 @@ public partial class FrmProductoEdicion : Form
                 Estado = (byte)(chkActivo.Checked ? 1 : 0)
             };
 
-            _productoServicio.Guardar(producto, "admin");
+            _productoServicio.Guardar(
+            producto,
+            SesionActual.NombreUsuario);
 
             MessageBox.Show("Producto guardado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;

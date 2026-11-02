@@ -256,3 +256,42 @@ Esta prueba es opcional y se realiza en la base de datos local de desarrollo.
    Verificar que se haya restaurado exactamente una fila.
 
 **Nota:** usar una cuenta de prueba y devolverla al rol Invitado al finalizar.
+
+### Registro del usuario autenticado en los CRUD
+
+Se implementó la clase `SesionActual` para conservar la identidad del usuario que inició sesión.
+
+Los formularios de Productos, Insumos y Usuarios utilizan el nombre del usuario autenticado para las operaciones de creación, modificación y desactivación de registros.
+
+También se utiliza en el cambio de contraseña desde el mantenimiento de usuarios.
+
+Los procedimientos almacenados reciben este nombre para registrar la auditoría en SQL Server.
+
+Se verificó la creación y modificación de un producto con la cuenta `admin_pa3`, comprobando los campos
+`Usuario_Registro` y `Usuario_Ult_Modificacion`.
+
+### Consulta de valor de negocio: stock por local
+
+Se implementó el formulario `FrmConsultaStockLocal`, siguiendo la arquitectura en capas del proyecto.
+
+Permite:
+
+- Consultar el inventario de todas las cafeterías.
+- Filtrar los resultados por local.
+- Mostrar únicamente los insumos con stock bajo.
+- Identificar insumos agotados.
+- Visualizar los estados Normal, Stock bajo y Sin stock.
+- Mostrar indicadores con los registros consultados.
+
+La consulta reutiliza el procedimiento almacenado `sp_ReporteStockPorLocal`, incluido en el script 3 del proyecto. No requiere nuevos scripts SQL.
+
+Archivos principales:
+
+- Entidades/Listados/StockPorLocalListado.cs
+- Datos/Repositorios/StockPorLocalRepositorio.cs
+- Negocio/Servicios/StockPorLocalServicio.cs
+- Windows/Formularios/FrmConsultaStockLocal.cs
+
+El formulario está disponible desde el menú principal para los roles Administrador y Encargado de Local.
+
+Se comprobó su funcionamiento con los datos de SQL Server, incluyendo filtros por local y stock bajo.

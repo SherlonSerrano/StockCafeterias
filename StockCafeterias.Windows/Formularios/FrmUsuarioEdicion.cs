@@ -160,7 +160,9 @@ public partial class FrmUsuarioEdicion : Form
                 Estado = (byte)(chkActivo.Checked ? 1 : 0)
             };
 
-            _usuarioServicio.Guardar(usuario, "admin");
+            _usuarioServicio.Guardar(
+            usuario,
+            SesionActual.NombreUsuario);
 
             MessageBox.Show("Usuario guardado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;

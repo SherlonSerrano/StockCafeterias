@@ -1,5 +1,6 @@
 using StockCafeterias.Entidades.Listados;
 using StockCafeterias.Negocio.Servicios;
+using StockCafeterias.Windows.Utilidades;
 
 namespace StockCafeterias.Windows.Formularios;
 
@@ -216,7 +217,9 @@ public partial class FrmUsuario : Form
         {
             try
             {
-                _usuarioServicio.Eliminar(seleccionado.IdUsuario, "admin");
+                _usuarioServicio.Eliminar(
+                seleccionado.IdUsuario,
+                SesionActual.NombreUsuario);
                 MessageBox.Show("Usuario desactivado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 CargarListado();
             }

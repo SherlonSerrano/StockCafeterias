@@ -1,4 +1,5 @@
 using StockCafeterias.Negocio.Servicios;
+using StockCafeterias.Windows.Utilidades;
 
 namespace StockCafeterias.Windows.Formularios;
 
@@ -41,7 +42,10 @@ public partial class FrmUsuarioCambiarClave : Form
                 return;
             }
 
-            _usuarioServicio.CambiarPassword(_idUsuario, clave, "admin");
+            _usuarioServicio.CambiarPassword(
+            _idUsuario,
+            clave,
+            SesionActual.NombreUsuario);
 
             MessageBox.Show("Contraseña actualizada exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;

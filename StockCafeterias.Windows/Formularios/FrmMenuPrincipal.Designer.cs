@@ -41,6 +41,7 @@ partial class FrmMenuPrincipal
         lblStatusUsuario = new ToolStripStatusLabel();
         lblStatusSeparador = new ToolStripStatusLabel();
         lblStatusFecha = new ToolStripStatusLabel();
+        btnConsultaStock = new Button();
         pnlHeader.SuspendLayout();
         pnlLateral.SuspendLayout();
         pnlContenedor.SuspendLayout();
@@ -57,7 +58,7 @@ partial class FrmMenuPrincipal
         pnlHeader.Controls.Add(lblTitulo);
         pnlHeader.Dock = DockStyle.Top;
         pnlHeader.Location = new Point(0, 0);
-        pnlHeader.Margin = new Padding(4, 4, 4, 4);
+        pnlHeader.Margin = new Padding(4);
         pnlHeader.Name = "pnlHeader";
         pnlHeader.Size = new Size(1250, 100);
         pnlHeader.TabIndex = 0;
@@ -89,13 +90,14 @@ partial class FrmMenuPrincipal
         // pnlLateral
         // 
         pnlLateral.BackColor = Color.FromArgb(52, 73, 94);
+        pnlLateral.Controls.Add(btnConsultaStock);
         pnlLateral.Controls.Add(btnSalir);
         pnlLateral.Controls.Add(btnUsuarios);
         pnlLateral.Controls.Add(btnInsumos);
         pnlLateral.Controls.Add(btnProductos);
         pnlLateral.Dock = DockStyle.Left;
         pnlLateral.Location = new Point(0, 100);
-        pnlLateral.Margin = new Padding(4, 4, 4, 4);
+        pnlLateral.Margin = new Padding(4);
         pnlLateral.Name = "pnlLateral";
         pnlLateral.Size = new Size(275, 650);
         pnlLateral.TabIndex = 1;
@@ -110,7 +112,7 @@ partial class FrmMenuPrincipal
         btnSalir.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
         btnSalir.ForeColor = Color.White;
         btnSalir.Location = new Point(0, 581);
-        btnSalir.Margin = new Padding(4, 4, 4, 4);
+        btnSalir.Margin = new Padding(4);
         btnSalir.Name = "btnSalir";
         btnSalir.Size = new Size(275, 69);
         btnSalir.TabIndex = 3;
@@ -127,7 +129,7 @@ partial class FrmMenuPrincipal
         btnUsuarios.Font = new Font("Segoe UI", 11F);
         btnUsuarios.ForeColor = Color.White;
         btnUsuarios.Location = new Point(0, 138);
-        btnUsuarios.Margin = new Padding(4, 4, 4, 4);
+        btnUsuarios.Margin = new Padding(4);
         btnUsuarios.Name = "btnUsuarios";
         btnUsuarios.Padding = new Padding(25, 0, 0, 0);
         btnUsuarios.Size = new Size(275, 69);
@@ -146,7 +148,7 @@ partial class FrmMenuPrincipal
         btnInsumos.Font = new Font("Segoe UI", 11F);
         btnInsumos.ForeColor = Color.White;
         btnInsumos.Location = new Point(0, 69);
-        btnInsumos.Margin = new Padding(4, 4, 4, 4);
+        btnInsumos.Margin = new Padding(4);
         btnInsumos.Name = "btnInsumos";
         btnInsumos.Padding = new Padding(25, 0, 0, 0);
         btnInsumos.Size = new Size(275, 69);
@@ -165,7 +167,7 @@ partial class FrmMenuPrincipal
         btnProductos.Font = new Font("Segoe UI", 11F);
         btnProductos.ForeColor = Color.White;
         btnProductos.Location = new Point(0, 0);
-        btnProductos.Margin = new Padding(4, 4, 4, 4);
+        btnProductos.Margin = new Padding(4);
         btnProductos.Name = "btnProductos";
         btnProductos.Padding = new Padding(25, 0, 0, 0);
         btnProductos.Size = new Size(275, 69);
@@ -184,7 +186,7 @@ partial class FrmMenuPrincipal
         pnlContenedor.Controls.Add(lblBienvenida);
         pnlContenedor.Dock = DockStyle.Fill;
         pnlContenedor.Location = new Point(275, 100);
-        pnlContenedor.Margin = new Padding(4, 4, 4, 4);
+        pnlContenedor.Margin = new Padding(4);
         pnlContenedor.Name = "pnlContenedor";
         pnlContenedor.Size = new Size(975, 650);
         pnlContenedor.TabIndex = 2;
@@ -197,7 +199,7 @@ partial class FrmMenuPrincipal
         pnlCardUsuarios.Controls.Add(lblCardUsuariosDesc);
         pnlCardUsuarios.Controls.Add(lblCardUsuariosTitulo);
         pnlCardUsuarios.Location = new Point(644, 125);
-        pnlCardUsuarios.Margin = new Padding(4, 4, 4, 4);
+        pnlCardUsuarios.Margin = new Padding(4);
         pnlCardUsuarios.Name = "pnlCardUsuarios";
         pnlCardUsuarios.Size = new Size(281, 287);
         pnlCardUsuarios.TabIndex = 3;
@@ -211,7 +213,7 @@ partial class FrmMenuPrincipal
         btnCardUsuarios.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
         btnCardUsuarios.ForeColor = Color.White;
         btnCardUsuarios.Location = new Point(25, 206);
-        btnCardUsuarios.Margin = new Padding(4, 4, 4, 4);
+        btnCardUsuarios.Margin = new Padding(4);
         btnCardUsuarios.Name = "btnCardUsuarios";
         btnCardUsuarios.Size = new Size(225, 52);
         btnCardUsuarios.TabIndex = 2;
@@ -250,7 +252,7 @@ partial class FrmMenuPrincipal
         pnlCardInsumos.Controls.Add(lblCardInsumosDesc);
         pnlCardInsumos.Controls.Add(lblCardInsumosTitulo);
         pnlCardInsumos.Location = new Point(344, 125);
-        pnlCardInsumos.Margin = new Padding(4, 4, 4, 4);
+        pnlCardInsumos.Margin = new Padding(4);
         pnlCardInsumos.Name = "pnlCardInsumos";
         pnlCardInsumos.Size = new Size(281, 287);
         pnlCardInsumos.TabIndex = 2;
@@ -264,7 +266,7 @@ partial class FrmMenuPrincipal
         btnCardInsumos.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
         btnCardInsumos.ForeColor = Color.White;
         btnCardInsumos.Location = new Point(25, 206);
-        btnCardInsumos.Margin = new Padding(4, 4, 4, 4);
+        btnCardInsumos.Margin = new Padding(4);
         btnCardInsumos.Name = "btnCardInsumos";
         btnCardInsumos.Size = new Size(225, 52);
         btnCardInsumos.TabIndex = 2;
@@ -303,7 +305,7 @@ partial class FrmMenuPrincipal
         pnlCardProductos.Controls.Add(lblCardProductosDesc);
         pnlCardProductos.Controls.Add(lblCardProductosTitulo);
         pnlCardProductos.Location = new Point(44, 125);
-        pnlCardProductos.Margin = new Padding(4, 4, 4, 4);
+        pnlCardProductos.Margin = new Padding(4);
         pnlCardProductos.Name = "pnlCardProductos";
         pnlCardProductos.Size = new Size(281, 287);
         pnlCardProductos.TabIndex = 1;
@@ -317,7 +319,7 @@ partial class FrmMenuPrincipal
         btnCardProductos.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
         btnCardProductos.ForeColor = Color.White;
         btnCardProductos.Location = new Point(25, 206);
-        btnCardProductos.Margin = new Padding(4, 4, 4, 4);
+        btnCardProductos.Margin = new Padding(4);
         btnCardProductos.Name = "btnCardProductos";
         btnCardProductos.Size = new Size(225, 52);
         btnCardProductos.TabIndex = 2;
@@ -389,6 +391,23 @@ partial class FrmMenuPrincipal
         lblStatusFecha.Size = new Size(160, 25);
         lblStatusFecha.Text = "Fecha: 2026-10-11";
         // 
+        // btnConsultaStock
+        // 
+        btnConsultaStock.Dock = DockStyle.Top;
+        btnConsultaStock.FlatAppearance.BorderSize = 0;
+        btnConsultaStock.FlatStyle = FlatStyle.Flat;
+        btnConsultaStock.Font = new Font("Segoe UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 0);
+        btnConsultaStock.ForeColor = Color.White;
+        btnConsultaStock.Location = new Point(0, 207);
+        btnConsultaStock.Name = "btnConsultaStock";
+        btnConsultaStock.Padding = new Padding(25, 0, 0, 0);
+        btnConsultaStock.Size = new Size(275, 69);
+        btnConsultaStock.TabIndex = 4;
+        btnConsultaStock.Text = "📊 Consulta de stock";
+        btnConsultaStock.TextAlign = ContentAlignment.MiddleLeft;
+        btnConsultaStock.UseVisualStyleBackColor = true;
+        btnConsultaStock.Click += btnConsultaStock_Click;
+        // 
         // FrmMenuPrincipal
         // 
         AutoScaleDimensions = new SizeF(10F, 25F);
@@ -399,7 +418,7 @@ partial class FrmMenuPrincipal
         Controls.Add(pnlContenedor);
         Controls.Add(pnlLateral);
         Controls.Add(pnlHeader);
-        Margin = new Padding(4, 4, 4, 4);
+        Margin = new Padding(4);
         MinimumSize = new Size(1182, 674);
         Name = "FrmMenuPrincipal";
         StartPosition = FormStartPosition.CenterScreen;
@@ -448,4 +467,5 @@ partial class FrmMenuPrincipal
     private ToolStripStatusLabel lblStatusUsuario;
     private ToolStripStatusLabel lblStatusSeparador;
     private ToolStripStatusLabel lblStatusFecha;
+    private Button btnConsultaStock;
 }
