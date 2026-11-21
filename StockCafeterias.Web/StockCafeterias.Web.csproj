@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\StockCafeterias.Datos\StockCafeterias.Datos.csproj" />
+    <ProjectReference Include="..\StockCafeterias.Entidades\StockCafeterias.Entidades.csproj" />
+    <ProjectReference Include="..\StockCafeterias.Negocio\StockCafeterias.Negocio.csproj" />
+  </ItemGroup>
+
+</Project>

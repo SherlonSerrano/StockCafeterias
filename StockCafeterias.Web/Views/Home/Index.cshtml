@@ -1,0 +1,117 @@
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+<div class="p-4 p-md-5 mb-4 rounded-3 bg-dark text-white shadow-sm">
+    <div class="container-fluid py-2">
+        <h1 class="display-6 fw-bold">
+            <i class="bi bi-cup-hot-fill text-warning me-2"></i>StockCafeterias Web
+        </h1>
+        <p class="col-lg-9 fs-5 text-light opacity-75 mb-0">
+            Módulo web desarrollado con ASP.NET Core MVC, Entity Framework Core y Bootstrap 5 para la gestión de
+            productos, insumos, usuarios y consultas estadísticas multi-local.
+        </p>
+    </div>
+</div>
+
+@if (ViewBag.ErrorConexion is string err)
+{
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@err
+    </div>
+}
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title text-primary mb-0">
+                        <i class="bi bi-cake2 me-2"></i>Productos
+                    </h5>
+                    <span class="badge bg-primary rounded-pill fs-6">@ViewBag.TotalProductos activos</span>
+                </div>
+                <p class="card-text text-muted flex-grow-1">
+                    Catálogo de productos finales, categorías, precios de venta, costos promedio y stock máximo.
+                </p>
+                <a asp-controller="Productos" asp-action="Index" class="btn btn-primary">
+                    Ir a Productos <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title text-warning-emphasis mb-0">
+                        <i class="bi bi-box-seam me-2"></i>Insumos
+                    </h5>
+                    <span class="badge bg-warning text-dark rounded-pill fs-6">@ViewBag.TotalInsumos activos</span>
+                </div>
+                <p class="card-text text-muted flex-grow-1">
+                    Control de insumos básicos, unidades de medida, precios unitarios y umbrales de stock mínimo.
+                </p>
+                <a asp-controller="Insumos" asp-action="Index" class="btn btn-warning text-dark fw-semibold">
+                    Ir a Insumos <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title text-success mb-0">
+                        <i class="bi bi-people me-2"></i>Usuarios
+                    </h5>
+                    <span class="badge bg-success rounded-pill fs-6">@ViewBag.TotalUsuarios activos</span>
+                </div>
+                <p class="card-text text-muted flex-grow-1">
+                    Administración de usuarios, roles, locales asignados y credenciales seguras con PBKDF2.
+                </p>
+                <a asp-controller="Usuarios" asp-action="Index" class="btn btn-success">
+                    Ir a Usuarios <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card h-100 border-start border-4 border-info">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title text-info-emphasis">
+                    <i class="bi bi-shop me-2"></i>Consulta: Stock por Local
+                </h5>
+                <p class="card-text text-muted flex-grow-1">
+                    Consulta paginada con filtros por cafetería, estado del stock y gráfico estadístico por local
+                    usando <code>sp_ReporteStockPorLocal</code>.
+                </p>
+                <a asp-controller="Consultas" asp-action="StockPorLocal" class="btn btn-outline-info text-dark">
+                    Abrir Consulta <i class="bi bi-bar-chart-line ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100 border-start border-4 border-danger">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title text-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Consulta: Alertas por Período
+                </h5>
+                <p class="card-text text-muted flex-grow-1">
+                    Consulta paginada con filtro por rango de fechas, local, tipo de alerta y gráfico comparativo
+                    usando <code>sp_ReporteAlertasPorPeriodo</code>.
+                </p>
+                <a asp-controller="Consultas" asp-action="AlertasPorPeriodo" class="btn btn-outline-danger">
+                    Abrir Consulta <i class="bi bi-graph-up ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

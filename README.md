@@ -18,6 +18,7 @@ Sistema de control de inventario multi-local para cafeterías, desarrollado como
 | `StockCafeterias.Datos` | `DbContext`, clase `Conexion` y un repositorio por tabla que ejecuta los procedimientos almacenados | Entidades |
 | `StockCafeterias.Negocio` | Validaciones y reglas de negocio | Datos, Entidades |
 | `StockCafeterias.Windows` | Menú principal y formularios | Negocio, Entidades |
+| `StockCafeterias.Web` | Módulo web ASP.NET Core MVC (3 CRUDs con EF Core + Bootstrap y 2 consultas estadísticas) | Datos, Negocio, Entidades |
 | `StockCafeterias.Pruebas` | Pruebas automáticas de los repositorios y la autenticación | Datos, Negocio, Entidades |
 
 **Regla principal:** `Windows` nunca referencia a `Datos`. Los formularios solo hablan con `Negocio`, y `Negocio` con `Datos`.
@@ -36,9 +37,9 @@ Sistema de control de inventario multi-local para cafeterías, desarrollado como
    **Atención:** el script 1 elimina y recrea la base `StockCafeterias` si ya existe. Ejecútalo solo para preparar una base nueva o descartable. Si ya tienes la base de la PA2 configurada, ejecuta únicamente los scripts 5 y 6, en ese orden, para actualizar el procedimiento de login y crear los usuarios de demostración. El script 4 es de pruebas de la PA2 y no forma parte de la instalación.
 
    Al final, `sys.tables` debe mostrar 13 tablas y `sys.procedures` 25 procedimientos.
-4. **Ajusta la cadena de conexión.** En `StockCafeterias.Datos/Conexion.cs`, cambia `Server=localhost` por el nombre que usas al conectarte en SSMS (por ejemplo `.\SQLEXPRESS`). **No subas ese cambio al repositorio** si es distinto al de los demás.
+4. **Ajusta la cadena de conexión.** En `StockCafeterias.Datos/Conexion.cs` (para Windows) y en `StockCafeterias.Web/appsettings.json` (para Web), cambia `Server=localhost` por el nombre que usas al conectarte en SSMS (por ejemplo `.\SQLEXPRESS`). **No subas ese cambio al repositorio** si es distinto al de los demás.
 5. **Compila** con Ctrl+Shift+B. Debe terminar con 0 errores.
-6. **Ejecuta la aplicación** desde el proyecto `StockCafeterias.Windows` (Ctrl+F5).
+6. **Ejecuta la aplicación** desde el proyecto `StockCafeterias.Windows` (escritorio) o `StockCafeterias.Web` (web ASP.NET Core MVC) con Ctrl+F5.
 7. **Ejecuta las pruebas** desde Prueba, Explorador de pruebas. Las pruebas de repositorios requieren SQL Server configurado; las siete pruebas de seguridad y autenticación se explican en la sección PA3.
 
 > Los archivos `.mdf` y `.ldf` no se suben a Git. Si necesitas la base ya armada, pídele los archivos al jefe de grupo.
@@ -83,6 +84,23 @@ StockCafeterias/
 │   │   └── ...                          formularios de Producto, Insumo y Usuario
 │   ├── Utilidades/
 │   │   └── SesionActual.cs             PA3
+│   └── Program.cs
+├── StockCafeterias.Web/                PA4 (ASP.NET Core MVC + EF Core + Bootstrap)
+│   ├── Controllers/
+│   │   ├── HomeController.cs
+│   │   ├── ProductosController.cs
+│   │   ├── InsumosController.cs
+│   │   ├── UsuariosController.cs
+│   │   └── ConsultasController.cs
+│   ├── Models/                         ViewModels de formularios y consultas
+│   ├── Views/
+│   │   ├── Shared/_Layout.cshtml       Navegación a los 3 CRUDs y Consultas
+│   │   ├── Home/
+│   │   ├── Productos/
+│   │   ├── Insumos/
+│   │   ├── Usuarios/
+│   │   └── Consultas/
+│   ├── appsettings.json
 │   └── Program.cs
 ├── StockCafeterias.Pruebas/
 │   ├── PasswordHasherPruebas.cs         PA3
@@ -135,7 +153,9 @@ Las clases de `Entidades/Modelos` se generaron con `Scaffold-DbContext` y luego 
 | Control de acceso por roles (PA3) | Listo (PR #3 en revisión) | Renato |
 | Pruebas de autenticación y seguridad (7 automatizadas) (PA3) | Listo (PR #3 en revisión) | Renato |
 | Registro del usuario autenticado en los CRUD (`SesionActual`) (PA3) | Listo (PR #3 en revisión) | Fernando / Renato |
-| Formulario de consulta de valor de negocio (`FrmConsultaStockLocal`) (PA3) | Listo (PR #3 en revisión) | Fernando / Renato |
+| Formulario de consulta de valor de negocio (`FrmConsultaStockLocal`) (PA3) | Listo | Fernando / Renato |
+| Proyecto Web ASP.NET Core MVC (`StockCafeterias.Web`) con 3 CRUDs EF Core + Bootstrap (PA4) | Listo | Fernando |
+| 2 formularios de consulta web con filtros, paginación y gráficos Chart.js (PA4) | Listo | Fernando |
 
 ## Cronograma de entregables
 
@@ -144,7 +164,7 @@ Las clases de `Entidades/Modelos` se generaron con `Scaffold-DbContext` y luego 
 | PA1 | 4 | Base de datos en SQL Server (nota 17, observaciones corregidas) |
 | PA2 | 7 | Solución N-Capas en Windows: menú principal y CRUD de Producto, Insumo y Usuario |
 | PA3 | 10 | Inicio de sesión con registro de usuario, auditoría de usuario en los CRUD y consulta de valor de negocio |
-| PA4 | 13 | Capa Web: 2 formularios de consulta con filtros, paginación y gráficos estadísticos |
+| PA4 | 13 | Capa Web ASP.NET Core MVC: 3 CRUDs con EF Core + Bootstrap y 2 formularios de consulta con filtros, paginación y gráficos estadísticos |
 | Examen final | 16 | Sistema completo, base de datos e informe final |
 
 
@@ -304,3 +324,26 @@ Archivos principales:
 El formulario está disponible desde el menú principal para los roles Administrador y Encargado de Local.
 
 Se comprobó su funcionamiento con los datos de SQL Server, incluyendo filtros por local y stock bajo.
+
+## PA4 - Módulo Web ASP.NET Core MVC
+
+Se implementó el proyecto `StockCafeterias.Web` utilizando **ASP.NET Core MVC**, **Entity Framework Core** (`StockCafeteriasContext`) y **Bootstrap 5**.
+
+### Navegación y CRUDs (`Productos`, `Insumos`, `Usuarios`)
+
+- La barra de navegación en `Views/Shared/_Layout.cshtml` incluye acceso directo a las vistas `Index` de **Productos**, **Insumos** y **Usuarios**, además del menú de **Consultas**.
+- Cada CRUD cuenta con las vistas `Index`, `Details`, `Create`, `Edit` y `Delete` (baja lógica con `Estado = 0`).
+- Las vistas `Index` incluyen búsqueda por texto y filtro de estado mediante **RadioButtons** (`Todos`, `Activos`, `Inactivos`).
+- Las vistas `Create` y `Edit` utilizan **CheckBox** (`EstadoActivo`) para gestionar el estado activo/inactivo del registro.
+- En `UsuariosController`, la creación y actualización de contraseña generan el hash seguro mediante `PasswordHasher.CrearHash`.
+
+### Formularios de consulta con filtros, paginación y gráficos estadísticos
+
+1. **Stock por Local** (`Consultas/StockPorLocal`):
+   - Consume el procedimiento `sp_ReporteStockPorLocal`.
+   - Permite filtrar por local, texto de insumo y estado del stock (`Todos`, `Stock bajo`, `Sin stock`).
+   - Incluye paginación Bootstrap y gráfico de barras apiladas con **Chart.js**.
+2. **Alertas por Período** (`Consultas/AlertasPorPeriodo`):
+   - Consume el procedimiento `sp_ReporteAlertasPorPeriodo` junto con el detalle de la tabla `Alerta` vía EF Core.
+   - Permite filtrar por rango de fechas, local y tipo de alerta (`Stock bajo`, `Sin stock`).
+   - Incluye paginación Bootstrap y gráfico comparativo por cafetería con **Chart.js**.

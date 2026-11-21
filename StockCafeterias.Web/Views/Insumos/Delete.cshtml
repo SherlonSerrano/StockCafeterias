@@ -1,0 +1,35 @@
+@model Insumo
+@{
+    ViewData["Title"] = "Desactivar Insumo";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Desactivar Insumo</h4>
+            </div>
+            <div class="card-body">
+                <p class="fs-5">¿Está seguro de desactivar el insumo <strong>@Model.Descripcion</strong>?</p>
+                <p class="text-muted small">Esta operación realiza una baja lógica (Estado = Inactivo), conservando el historial en la base de datos.</p>
+
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Unidad</dt>
+                    <dd class="col-sm-8">@Model.IdUnidadMedidaNavigation?.Nombre</dd>
+
+                    <dt class="col-sm-4">Stock Actual</dt>
+                    <dd class="col-sm-8">@Model.StockActual.ToString("N2")</dd>
+                </dl>
+            </div>
+            <div class="card-footer bg-white d-flex justify-content-end gap-2">
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" asp-for="IdInsumo" />
+                    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Confirmar Desactivación
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

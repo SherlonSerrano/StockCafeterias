@@ -1,0 +1,15 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="card border-danger">
+    <div class="card-body">
+        <h1 class="text-danger h4">Ocurrió un error al procesar la solicitud</h1>
+        <p class="text-muted">Por favor, intente nuevamente o verifique la conexión con la base de datos.</p>
+        @if (Model.ShowRequestId)
+        {
+            <p class="mb-0"><strong>ID de solicitud:</strong> <code>@Model.RequestId</code></p>
+        }
+    </div>
+</div>

@@ -1,0 +1,73 @@
+@model Producto
+@{
+    ViewData["Title"] = "Detalle de Producto";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="bi bi-cake2 me-2"></i>Detalle de Producto #@Model.IdProducto</h4>
+                @if (Model.Estado == 1)
+                {
+                    <span class="badge bg-light text-success">Activo</span>
+                }
+                else
+                {
+                    <span class="badge bg-light text-danger">Inactivo</span>
+                }
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-5">Nombre</dt>
+                            <dd class="col-sm-7 fw-semibold">@Model.Nombre</dd>
+
+                            <dt class="col-sm-5">Categoría</dt>
+                            <dd class="col-sm-7">@Model.IdCategoriaNavigation?.Nombre</dd>
+
+                            <dt class="col-sm-5">Precio de Venta</dt>
+                            <dd class="col-sm-7">S/ @Model.PrecioVenta.ToString("N2")</dd>
+
+                            <dt class="col-sm-5">Costo Promedio</dt>
+                            <dd class="col-sm-7">S/ @Model.CostoPromedio.ToString("N2")</dd>
+
+                            <dt class="col-sm-5">Stock Máximo</dt>
+                            <dd class="col-sm-7">@Model.StockMaximo</dd>
+
+                            <dt class="col-sm-5">Registrado por</dt>
+                            <dd class="col-sm-7">@Model.UsuarioRegistro (@Model.FechaRegistro.ToString("dd/MM/yyyy HH:mm"))</dd>
+
+                            @if (!string.IsNullOrEmpty(Model.UsuarioUltModificacion))
+                            {
+                                <dt class="col-sm-5">Última Modificación</dt>
+                                <dd class="col-sm-7">@Model.UsuarioUltModificacion (@Model.FechaUltModificacion?.ToString("dd/MM/yyyy HH:mm"))</dd>
+                            }
+                        </dl>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        @if (Model.Foto != null && Model.Foto.Length > 0)
+                        {
+                            var base64 = Convert.ToBase64String(Model.Foto);
+                            <img src="data:image/png;base64,@base64" alt="@Model.Nombre" class="img-fluid rounded border" style="max-height: 200px;" />
+                        }
+                        else
+                        {
+                            <div class="border rounded p-4 text-muted bg-light">
+                                <i class="bi bi-image fs-1 d-block mb-1"></i>
+                                <small>Sin fotografía</small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white d-flex justify-content-end gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.IdProducto" class="btn btn-warning">
+                    <i class="bi bi-pencil me-1"></i>Editar
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+            </div>
+        </div>
+    </div>
+</div>

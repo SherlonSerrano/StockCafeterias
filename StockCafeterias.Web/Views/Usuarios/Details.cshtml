@@ -1,0 +1,58 @@
+@model Usuario
+@{
+    ViewData["Title"] = "Detalle de Usuario";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="bi bi-person-badge me-2"></i>Detalle de Usuario #@Model.IdUsuario</h4>
+                @if (Model.Estado == 1)
+                {
+                    <span class="badge bg-light text-success">Activo</span>
+                }
+                else
+                {
+                    <span class="badge bg-light text-danger">Inactivo</span>
+                }
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Nombres y Apellidos</dt>
+                    <dd class="col-sm-8 fw-semibold">@Model.Nombres @Model.Apellidos</dd>
+
+                    <dt class="col-sm-4">Nombre de Usuario</dt>
+                    <dd class="col-sm-8"><code>@Model.NombreUsuario</code></dd>
+
+                    <dt class="col-sm-4">Rol</dt>
+                    <dd class="col-sm-8">@Model.IdRolNavigation?.Nombre</dd>
+
+                    <dt class="col-sm-4">Local Asignado</dt>
+                    <dd class="col-sm-8">@(Model.IdLocalNavigation?.Nombre ?? "Sin local asignado")</dd>
+
+                    <dt class="col-sm-4">DNI</dt>
+                    <dd class="col-sm-8">@(Model.Dni ?? "-")</dd>
+
+                    <dt class="col-sm-4">Correo Electrónico</dt>
+                    <dd class="col-sm-8">@(Model.Email ?? "-")</dd>
+
+                    <dt class="col-sm-4">Teléfono</dt>
+                    <dd class="col-sm-8">@(Model.Telefono ?? "-")</dd>
+
+                    <dt class="col-sm-4">Fecha de Ingreso</dt>
+                    <dd class="col-sm-8">@Model.FechaIngreso.ToString("dd/MM/yyyy")</dd>
+
+                    <dt class="col-sm-4">Registrado por</dt>
+                    <dd class="col-sm-8">@Model.UsuarioRegistro (@Model.FechaRegistro.ToString("dd/MM/yyyy HH:mm"))</dd>
+                </dl>
+            </div>
+            <div class="card-footer bg-white d-flex justify-content-end gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.IdUsuario" class="btn btn-warning">
+                    <i class="bi bi-pencil me-1"></i>Editar
+                </a>
+                <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+            </div>
+        </div>
+    </div>
+</div>
