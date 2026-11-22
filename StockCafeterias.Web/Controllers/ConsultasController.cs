@@ -156,7 +156,13 @@ public class ConsultasController : Controller
         int totalPaginas = Math.Max(1, (int)Math.Ceiling(totalRegistros / (double)tamanoPagina));
         pagina = Math.Clamp(pagina, 1, totalPaginas);
 
-        var localesGrafico = resumen.Select(r => r.Local).Distinct().OrderBy(x => x).ToList();
+
+        var localesGrafico = todasAlertas
+            .Select(a => a.Local)
+            .Distinct()
+            .OrderBy(x => x)
+            .ToList();
+
 
         var vm = new AlertasPorPeriodoConsultaViewModel
         {
@@ -174,12 +180,130 @@ public class ConsultasController : Controller
             Registros = todasAlertas.Skip((pagina - 1) * tamanoPagina).Take(tamanoPagina).ToList(),
             ResumenProcedimiento = resumen,
             GraficoLocales = localesGrafico,
+
             GraficoStockBajo = localesGrafico.Select(loc =>
-                resumen.Where(r => r.Local == loc && r.TipoAlerta == "Stock bajo").Sum(r => r.Total)).ToList(),
+                todasAlertas.Count(a =>
+                    a.Local == loc && a.TipoAlerta == "Stock bajo")).ToList(),
+
             GraficoSinStock = localesGrafico.Select(loc =>
-                resumen.Where(r => r.Local == loc && r.TipoAlerta == "Sin stock").Sum(r => r.Total)).ToList()
+                todasAlertas.Count(a =>
+                    a.Local == loc && a.TipoAlerta == "Sin stock")).ToList()
+
         };
 
         return View(vm);
     }
+
+
+    public async Task<IActionResult> MovimientosPorPeriodo(
+        DateTime? fechaInicio,
+        DateTime? fechaFin,
+        string? insumo,
+        string? local,
+        string tipoMovimiento = "todos",
+        int pagina = 1)
+    {
+        const int tamanoPagina = 10;
+
+        // Fechas del reporte
+        var inicio = (fechaInicio ??
+            DateTime.Today.AddMonths(-3)).Date;
+
+        var fin = (fechaFin ?? DateTime.Today).Date;
+
+        if (fin < inicio)
+            fin = inicio;
+
+        var finExclusivo = fin.AddDays(1);
+
+        // Consultar la vista de movimientos
+        var movimientos = await _context.VwMovimientosDetallado
+            .AsNoTracking()
+            .Where(m =>
+                m.FechaMovimiento >= inicio &&
+                m.FechaMovimiento < finExclusivo)
+            .OrderByDescending(m => m.FechaMovimiento)
+            .ThenByDescending(m => m.IdMovimiento)
+            .ToListAsync();
+
+        // Filtrar por insumo
+        if (!string.IsNullOrWhiteSpace(insumo))
+        {
+            movimientos = movimientos
+                .Where(m => m.Insumo.Contains(
+                    insumo.Trim(),
+                    StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        // Filtrar por cafetería
+        if (!string.IsNullOrWhiteSpace(local))
+        {
+            movimientos = movimientos
+                .Where(m => m.Local.Contains(
+                    local.Trim(),
+                    StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        // Filtrar por tipo de movimiento
+        if (tipoMovimiento is "Envio" or "Ajuste" or "Merma")
+        {
+            movimientos = movimientos
+                .Where(m => m.TipoMovimiento == tipoMovimiento)
+                .ToList();
+        }
+
+        // Calcular indicadores
+        int totalRegistros = movimientos.Count;
+        int totalEnvios = movimientos.Count(
+            m => m.TipoMovimiento == "Envio");
+        int totalAjustes = movimientos.Count(
+            m => m.TipoMovimiento == "Ajuste");
+        int totalMermas = movimientos.Count(
+            m => m.TipoMovimiento == "Merma");
+
+        // Calcular paginación
+        int totalPaginas = Math.Max(1,
+            (int)Math.Ceiling(
+                totalRegistros / (double)tamanoPagina));
+
+        pagina = Math.Clamp(pagina, 1, totalPaginas);
+
+        var vm = new MovimientosPorPeriodoConsultaViewModel
+        {
+            FechaInicio = inicio,
+            FechaFin = fin,
+            Insumo = insumo,
+            Local = local,
+            TipoMovimiento = tipoMovimiento,
+
+            PaginaActual = pagina,
+            TotalPaginas = totalPaginas,
+            TamanoPagina = tamanoPagina,
+
+            TotalRegistros = totalRegistros,
+            TotalEnvios = totalEnvios,
+            TotalAjustes = totalAjustes,
+            TotalMermas = totalMermas,
+
+            Registros = movimientos
+                .Skip((pagina - 1) * tamanoPagina)
+                .Take(tamanoPagina)
+                .ToList(),
+
+            GraficoTipos = new List<string>
+        {
+            "Envio", "Ajuste", "Merma"
+        },
+
+            GraficoMovimientos = new List<int>
+        {
+            totalEnvios, totalAjustes, totalMermas
+        }
+        };
+
+        return View(vm);
+    }
+
 }
