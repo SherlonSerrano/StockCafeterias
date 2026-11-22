@@ -34,7 +34,11 @@
 
                         <div class="col-md-6">
                             <label asp-for="Password" class="form-label fw-semibold"></label>
-                            <input asp-for="Password" class="form-control" placeholder="Mínimo 12 caracteres" />
+                            <input asp-for="Password"
+                                   class="form-control"
+                                   placeholder="Mínimo 12 caracteres"
+                                   data-val="true"
+                                   data-val-required="La contraseña es obligatoria para un usuario nuevo." />
                             <span asp-validation-for="Password" class="text-danger small"></span>
                         </div>
 

@@ -1,0 +1,313 @@
+﻿@model MovimientosPorPeriodoConsultaViewModel
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Movimientos por Período";
+}
+
+<div class="mb-4">
+    <h2 class="h3">
+        <i class="bi bi-arrow-left-right text-primary me-2"></i>
+        Consulta de Movimientos de Inventario
+    </h2>
+    <p class="text-muted">
+        Historial detallado de movimientos de insumos
+        por fechas, cafetería y tipo de operación.
+    </p>
+</div>
+
+<!-- INDICADORES -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-start border-4 border-primary">
+            <div class="card-body">
+                <div class="text-muted small">Total Movimientos</div>
+                <div class="fs-3 fw-bold text-primary">
+                    @Model.TotalRegistros
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-start border-4 border-success">
+            <div class="card-body">
+                <div class="text-muted small">Envíos</div>
+                <div class="fs-3 fw-bold text-success">
+                    @Model.TotalEnvios
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-start border-4 border-warning">
+            <div class="card-body">
+                <div class="text-muted small">Ajustes</div>
+                <div class="fs-3 fw-bold text-warning">
+                    @Model.TotalAjustes
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-start border-4 border-danger">
+            <div class="card-body">
+                <div class="text-muted small">Mermas</div>
+                <div class="fs-3 fw-bold text-danger">
+                    @Model.TotalMermas
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FILTROS -->
+<div class="card mb-4">
+    <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-funnel me-2"></i>
+        Filtros de búsqueda
+    </div>
+
+    <div class="card-body">
+        <form asp-action="MovimientosPorPeriodo"
+              method="get"
+              class="row g-3 align-items-end">
+
+            <div class="col-md-2">
+                <label class="form-label">Fecha Inicio</label>
+                <input type="date"
+                       name="fechaInicio"
+                       class="form-control"
+                       value="@Model.FechaInicio.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Fecha Fin</label>
+                <input type="date"
+                       name="fechaFin"
+                       class="form-control"
+                       value="@Model.FechaFin.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Insumo</label>
+                <input type="text"
+                       name="insumo"
+                       class="form-control"
+                       value="@Model.Insumo"
+                       placeholder="Buscar insumo..." />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Cafetería</label>
+                <input type="text"
+                       name="local"
+                       class="form-control"
+                       value="@Model.Local"
+                       placeholder="Buscar local..." />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Tipo</label>
+                <select name="tipoMovimiento" class="form-select">
+                    <option value="todos"
+                            selected="@(Model.TipoMovimiento == "todos")">
+                        Todos
+                    </option>
+                    <option value="Envio"
+                            selected="@(Model.TipoMovimiento == "Envio")">
+                        Envío
+                    </option>
+                    <option value="Ajuste"
+                            selected="@(Model.TipoMovimiento == "Ajuste")">
+                        Ajuste
+                    </option>
+                    <option value="Merma"
+                            selected="@(Model.TipoMovimiento == "Merma")">
+                        Merma
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-1">
+                <button type="submit"
+                        class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- TABLA DE MOVIMIENTOS -->
+<div class="card mb-4">
+    <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-table me-2"></i>
+        Detalle de Movimientos
+        (Página @Model.PaginaActual de @Model.TotalPaginas)
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Fecha</th>
+                    <th>Cafetería</th>
+                    <th>Insumo</th>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th>Usuario</th>
+                    <th>Observación</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!Model.Registros.Any())
+                {
+                    <tr>
+                        <td colspan="8"
+                            class="text-center text-muted py-4">
+                            No se encontraron movimientos
+                            con los filtros seleccionados.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var mov in Model.Registros)
+                    {
+                        <tr>
+                            <td>@mov.IdMovimiento</td>
+                            <td>
+                                @mov.FechaMovimiento.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                            <td>@mov.Local</td>
+                            <td class="fw-semibold">@mov.Insumo</td>
+                            <td>
+                                @if (mov.TipoMovimiento == "Envio")
+                                {
+                                    <span class="badge bg-success">
+                                        Envío
+                                    </span>
+                                }
+                                else if (mov.TipoMovimiento == "Ajuste")
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        Ajuste
+                                    </span>
+                                }
+                                else if (mov.TipoMovimiento == "Merma")
+                                {
+                                    <span class="badge bg-danger">
+                                        Merma
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        @mov.TipoMovimiento
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @mov.Cantidad.ToString("N2")
+                                @mov.Unidad
+                            </td>
+                            <td>@mov.Usuario</td>
+                            <td>@mov.Observacion</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    @if (Model.TotalPaginas > 1)
+    {
+        <div class="card-footer bg-white">
+            <nav aria-label="Paginación de movimientos">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    @for (int i = 1; i <= Model.TotalPaginas; i++)
+                    {
+                        <li class="page-item @(i == Model.PaginaActual ? "active" : "")">
+                            <a class="page-link"
+                               asp-action="MovimientosPorPeriodo"
+                               asp-route-fechaInicio="@Model.FechaInicio.ToString("yyyy-MM-dd")"
+                               asp-route-fechaFin="@Model.FechaFin.ToString("yyyy-MM-dd")"
+                               asp-route-insumo="@Model.Insumo"
+                               asp-route-local="@Model.Local"
+                               asp-route-tipoMovimiento="@Model.TipoMovimiento"
+                               asp-route-pagina="@i">
+                                @i
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
+
+<!-- GRÁFICO -->
+<div class="card mb-4">
+    <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-bar-chart me-2"></i>
+        Distribución de Movimientos por Tipo
+    </div>
+
+    <div class="card-body">
+        <div style="height: 300px;">
+            <canvas id="graficoMovimientos"></canvas>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+    <script>
+        const tipos = @Html.Raw(
+                    JsonSerializer.Serialize(Model.GraficoTipos));
+
+        const cantidades = @Html.Raw(
+                    JsonSerializer.Serialize(Model.GraficoMovimientos));
+
+        new Chart(document.getElementById('graficoMovimientos'), {
+            type: 'bar',
+            data: {
+                labels: tipos,
+                datasets: [{
+                    label: 'Cantidad de movimientos',
+                    data: cantidades,
+                    backgroundColor: [
+                        '#198754',
+                        '#ffc107',
+                        '#dc3545'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}
